@@ -8,3 +8,4 @@ Instructions:
     - Build: `go build`
     - Test: `go test ./...`
     - Run: `go run main.go`
+test
