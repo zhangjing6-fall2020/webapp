@@ -2,7 +2,7 @@ package main
 
 import (
 	"cloudcomputing/webapp/config"
-	"cloudcomputing/webapp/model"
+	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/route"
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -17,7 +17,7 @@ func main() {
 	}
 	defer config.DB.Close()
 
-	config.DB.AutoMigrate(&model.User{})
+	config.DB.AutoMigrate(&entity.User{})
 
 	/*user := model.User{ID: "6", FirstName: "jin", LastName: "z", Password: "123",
 		EmailAddress: "123@gmail.com", AccountCreated: time.Now(), AccountUpdated: time.Now()}

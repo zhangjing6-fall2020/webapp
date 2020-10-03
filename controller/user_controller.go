@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 
 //GetUsers ... Get all users
 func GetUsers(c *gin.Context) {
-	var users []model.User
+	var users []entity.User
 	err := model.GetAllUsers(&users)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -31,10 +32,10 @@ func GetUsers(c *gin.Context) {
 
 //CreateUser ... Create User
 func CreateUser(c *gin.Context) {
-	var user model.User
+	var user entity.User
 	c.BindJSON(&user)
 
-	var checkUser model.User
+	var checkUser entity.User
 	if err := model.GetUserByUsername(&checkUser, *user.Username); err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "the email has been registered!",
@@ -62,7 +63,7 @@ func CreateUser(c *gin.Context) {
 //GetUserByID ... Get the user by id
 func GetUserByID(c *gin.Context) {
 	id := c.Params.ByName("id")
-	var user model.User
+	var user entity.User
 	err := model.GetUserByID(&user, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -84,7 +85,7 @@ func GetUserByID(c *gin.Context) {
 //GetUserByID ... Get the user by id
 func GetUserByUsername(c *gin.Context) {
 	username := c.Params.ByName("username")
-	var user model.User
+	var user entity.User
 	err := model.GetUserByUsername(&user, username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -105,7 +106,7 @@ func GetUserByUsername(c *gin.Context) {
 
 //UpdateUser ... Update the user information
 func UpdateUserWithSamePwd(c *gin.Context) {
-	var user model.User
+	var user entity.User
 	id := c.Params.ByName("id")
 	err := model.GetUserByID(&user, id)
 	if err != nil {
@@ -134,7 +135,7 @@ func UpdateUserWithSamePwd(c *gin.Context) {
 }
 
 func UpdateUserWithDiffPwd(c *gin.Context) {
-	var user model.User
+	var user entity.User
 	id := c.Params.ByName("id")
 	err := model.GetUserByID(&user, id)
 	if err != nil {
@@ -164,7 +165,7 @@ func UpdateUserWithDiffPwd(c *gin.Context) {
 
 //DeleteUser ... Delete the user
 func DeleteUser(c *gin.Context) {
-	var user model.User
+	var user entity.User
 	id := c.Params.ByName("id")
 	err := model.DeleteUser(&user, id)
 

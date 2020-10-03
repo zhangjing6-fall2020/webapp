@@ -2,6 +2,7 @@ package route
 
 import (
 	"cloudcomputing/webapp/controller"
+	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
 	"cloudcomputing/webapp/tool"
 	"encoding/base64"
@@ -28,7 +29,7 @@ func SetupRouter() *gin.Engine {
 
 	authorized := r.Group("/v1", basicAuth())
 	authorized.GET("/user/self", func(c *gin.Context) {
-		var user model.User
+		var user entity.User
 		err := model.GetUserByUsername(&user, currUsername)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -49,7 +50,7 @@ func SetupRouter() *gin.Engine {
 	//authorized.GET("/user/:email_address", controller.GetUserByEmail)
 	//authorized.PUT("/user/:id", controller.UpdateUser)
 	authorized.PUT("/user/self", func(c *gin.Context) {
-		var user model.User
+		var user entity.User
 		err := model.GetUserByUsername(&user, currUsername)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -128,7 +129,7 @@ func basicAuth() gin.HandlerFunc {
 
 func authenticateUser(username, password string) bool {
 	currUsername = username
-	var user model.User
+	var user entity.User
 	err := model.GetUserByUsername(&user, username)
 	if err != nil {
 		fmt.Println("search user by email error: ", err)
