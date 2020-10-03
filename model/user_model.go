@@ -12,7 +12,7 @@ import (
 
 //GetAllUsers Fetch all user data
 func GetAllUsers(user *[]entity.User) (err error) {
-	if err = config.DB.Find(user).Error; err != nil {
+	if err = config.DB.Find(&user).Error; err != nil {
 		return err
 	}
 	return nil
@@ -31,7 +31,7 @@ func CreateUser(user *entity.User) (err error) {
 	user.Password = tool.BcryptAndSalt(user.Password)
 	user.AccountCreated = time.Now()
 	user.AccountUpdated = time.Now()
-	if err = config.DB.Create(user).Error; err != nil {
+	if err = config.DB.Create(&user).Error; err != nil {
 		return err
 	}
 	return nil
@@ -39,14 +39,14 @@ func CreateUser(user *entity.User) (err error) {
 
 //GetUserByID ... Fetch only one user by Id
 func GetUserByID(user *entity.User, id string) (err error) {
-	if err = config.DB.Where("id = ?", id).First(user).Error; err != nil {
+	if err = config.DB.Where("id = ?", id).First(&user).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func GetUserByUsername(user *entity.User, username string) (err error) {
-	if err = config.DB.Where("username = ?", username).First(user).Error; err != nil {
+	if err = config.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		return err
 	}
 	return nil
@@ -59,7 +59,7 @@ func UpdateUserWithSamePwd(user *entity.User, id string) (err error) {
 	}
 
 	user.AccountUpdated = time.Now()
-	config.DB.Save(user)
+	config.DB.Save(&user)
 	return nil
 }
 
@@ -73,15 +73,15 @@ func UpdateUserWithDiffPwd(user *entity.User, id string) (err error) {
 	}
 	user.Password = tool.BcryptAndSalt(user.Password)
 	user.AccountUpdated = time.Now()
-	config.DB.Save(user)
+	config.DB.Save(&user)
 	return nil
 }
 
 //DeleteUser ... Delete user
 func DeleteUser(user *entity.User, id string) (err error) {
-	if config.DB.Where("id = ?", id).First(user); user.ID == "" {
+	if config.DB.Where("id = ?", id).First(&user); user.ID == "" {
 		return errors.New("the user doesn't exist!!!")
 	}
-	config.DB.Where("id = ?", id).Delete(user)
+	config.DB.Where("id = ?", id).Delete(&user)
 	return nil
 }

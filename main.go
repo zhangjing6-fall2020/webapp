@@ -20,7 +20,8 @@ func main() {
 	config.DB.AutoMigrate(&entity.User{})
 	config.DB.AutoMigrate(&entity.Question{}).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
 	config.DB.AutoMigrate(&entity.Answer{}).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT").AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT")
-	config.DB.AutoMigrate(&entity.Category{}).AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT")
+	config.DB.AutoMigrate(&entity.Category{})
+	config.DB.AutoMigrate(&entity.QuestionCategory{}).AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT").AddForeignKey("category_id", "categories(id)", "RESTRICT", "RESTRICT")
 
 	r := route.SetupRouter()
 

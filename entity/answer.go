@@ -5,9 +5,9 @@ import (
 )
 
 type Answer struct {
-	ID               string    `json:"answer_id"`
-	CreatedTimestamp time.Time `json:"answer_created_timestamp"`
-	UpdatedTimestamp time.Time `json:"answer_updated_timestamp"`
+	ID               string    `gorm:"primary_key" json:"answer_id"`
+	CreatedTimestamp time.Time `json:"created_timestamp"`
+	UpdatedTimestamp time.Time `json:"updated_timestamp"`
 	AnswerText             string    `json:"answer_text"`
 	UserID                 string    `json:"user_id"`
 	User                   User `gorm:"ForeignKey:ID;AssociationForeignKey:UserID"`
