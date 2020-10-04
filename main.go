@@ -6,13 +6,11 @@ import (
 	"cloudcomputing/webapp/route"
 	"fmt"
 	"github.com/jinzhu/gorm"
-	"sort"
 )
 
 var err error
 
 func main() {
-	test()
 	config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
 	if err != nil {
 		fmt.Println("Status:", err)
@@ -31,27 +29,3 @@ func main() {
 	r.Run()
 }
 
-func test()  {
-	categories := entity.Categories{
-		{
-			ID: "1",
-			Category: "a",
-		},
-		{
-			ID: "2",
-			Category: "b",
-		},
-		{
-			ID: "3",
-			Category: "c",
-		},
-	}
-
-	for _, c := range categories{
-		fmt.Println(c.ID+":"+c.Category)
-	}
-	sort.Sort(categories)
-	for _, c := range categories{
-		fmt.Println(c.ID+":"+c.Category)
-	}
-}

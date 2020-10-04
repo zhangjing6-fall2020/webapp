@@ -78,7 +78,7 @@ func UpdateQuestionCategory(c *gin.Context) {
 		return
 	}
 	c.BindJSON(&questionCategory)
-	err = model.UpdateQuestionCategory(&questionCategory, questionID, categoryID)
+	err = model.UpdateQuestionCategory(&questionCategory)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -94,9 +94,14 @@ func DeleteQuestionCategory(c *gin.Context) {
 	var questionCategory entity.QuestionCategory
 	questionID := c.Params.ByName("question_id")
 	categoryID := c.Params.ByName("category_id")
-	err := model.DeleteQuestionCategory(&questionCategory, questionID, categoryID)
+	if err := model.GetQuestionCategoryByIDs(&questionCategory,questionID,categoryID); err!=nil{
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
-	if err != nil {
+	if err := model.DeleteQuestionCategory(&questionCategory, questionID, categoryID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})

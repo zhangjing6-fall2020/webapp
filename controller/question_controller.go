@@ -3,16 +3,37 @@ package controller
 import (
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"reflect"
 )
 
-type OrderedMap map[string]string
+type void struct{}
+var member void
+
+func getAllCategoriesByQuestion(question entity.Question) entity.Question {
+	//get all questionCategories by the questionId
+	var questionCategories []entity.QuestionCategory
+	if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, question.ID); err != nil {
+		fmt.Println(err)
+	}
+	//get all the categories by questionCategories, and add the categories to the question
+	for _, qc := range questionCategories {
+		var category entity.Category
+		if err := model.GetCategoryByID(&category, qc.CategoryID); err != nil {
+			fmt.Println(err)
+		}
+		question.Categories = append(question.Categories, category)
+	}
+	return question
+}
 
 //GetQuestions ... Get all Questions
 func GetQuestions(c *gin.Context) {
 	var questions []entity.Question
 	err := model.GetAllQuestions(&questions)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -20,11 +41,72 @@ func GetQuestions(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": questions})
+	var questionsWithCategoriesAndAnswers []entity.Question
+	for _,q := range questions {
+		q = getAllCategoriesByQuestion(q)
+		/*var questionCategories []entity.QuestionCategory
+		if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, q.ID); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		//get all the categories by questionCategories, and add the categories to the question
+		for _, qc := range questionCategories {
+			var category entity.Category
+			model.GetCategoryByID(&category, qc.CategoryID)
+			q.Categories = append(q.Categories, category)
+		}*/
+
+		questionsWithCategoriesAndAnswers = append(questionsWithCategoriesAndAnswers, q)
+	}
+
+	c.JSON(http.StatusOK, questionsWithCategoriesAndAnswers)
 }
 
-//CreateQuestion ... Create Question
-func CreateQuestion(c *gin.Context, userID string) {
+//GetQuestionByID ... Get the Question by id
+func GetQuestionByID(c *gin.Context) {
+	id := c.Params.ByName("id")
+	var question entity.Question
+	err := model.GetQuestionByID(&question, id)
+	if err != nil{
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	/*//get all questionCategories by the questionId
+	var questionCategories []entity.QuestionCategory
+	if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, question.ID); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	//get all the categories by questionCategories, and add the categories to the question
+	for _, qc := range questionCategories {
+		var category entity.Category
+		model.GetCategoryByID(&category, qc.CategoryID)
+		question.Categories = append(question.Categories, category)
+	}*/
+
+	question = getAllCategoriesByQuestion(question)
+
+	//tbd: answers
+
+	c.JSON(http.StatusOK, question)
+}
+
+//CreateQuestion ... Create Question for authorized user
+//get the unique category
+//create the category if not exist
+//set the question's categories
+//create the question
+//create the questioncategory with the questionID and categoryID
+func CreateQuestionAuth(c *gin.Context, userID string) {
 	var question entity.Question
 	c.BindJSON(&question)
 
@@ -32,17 +114,26 @@ func CreateQuestion(c *gin.Context, userID string) {
 	question.UserID = userID
 	model.GetUserByID(&question.User, userID)
 
-	//check each category exists or not:
-	//if exist, continue
-	//if doesn't exist, create the category
-	var categoryIDs []string
-	//in order to avoid duplicate categories in the same question input:
-	//tbd
-	for i, category := range question.Categories {
+	//add unique categories in the same question input to set
+	set := make(map[entity.Category]void)
+	for _, category := range question.Categories {
+		_, exists := set[category]
+		if !exists {
+			set[category] = member
+		}
+	}
+
+	//in order to drop duplicate categories in the question
+	//1. clear the question.Categories
+	question.Categories = append([]entity.Category{})
+	//for each unique category:
+	//a. check exists in the category or not, if not create
+	//b. add to the question.Categories
+	for category := range set {
 		err := model.GetCategoryByName(&category, category.Category)
 		//if the category isn't found, it will return `record not found`
 		if err == nil {
-			categoryIDs = append(categoryIDs, category.ID)
+			fmt.Println("the category" + category.Category + "already exists")
 		} else if err.Error() == "record not found" {
 			if err := model.CreateCategory(&category); err != nil {
 				c.JSON(http.StatusNotFound, gin.H{
@@ -50,14 +141,13 @@ func CreateQuestion(c *gin.Context, userID string) {
 				})
 				return
 			}
-			categoryIDs = append(categoryIDs, category.ID)
-		} else {
+		}else {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
-		question.Categories[i] = category
+		question.Categories = append(question.Categories, category)
 	}
 
 	//create the question
@@ -68,13 +158,18 @@ func CreateQuestion(c *gin.Context, userID string) {
 		})
 		return
 	}
+	//question.User.Questions = append(question.User.Questions, question)
+
 
 	//for each category, create questionCategory with questionID and categoryID
-	for _, c := range categoryIDs {
+	//Attention: can't use set here because category in set doesn't have ID
+	for _, c := range question.Categories {
 		var questionCategory entity.QuestionCategory
-		questionCategory.CategoryID = c
 		questionCategory.QuestionID = question.ID
+		questionCategory.CategoryID = c.ID
 		model.CreateQuestionCategory(&questionCategory)
+		//question.QuestionCategories = append(question.QuestionCategories, questionCategory)
+		//c.QuestionCategories = append(c.QuestionCategories, questionCategory)
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
@@ -88,55 +183,236 @@ func CreateQuestion(c *gin.Context, userID string) {
 	})
 }
 
-//GetQuestionByID ... Get the Question by id
-func GetQuestionByID(c *gin.Context) {
-	id := c.Params.ByName("id")
-	var question entity.Question
-	err := model.GetQuestionByID(&question, id)
-	if err != nil {
+//UpdateQuestion ... Update Question for authorized user
+//1. if both questiontext and categories are null, return StatusNotFound
+//2. get the question according to the questionID
+//3. update question text if the questiontext input is not null
+//4. update the question categories if the question categories input is not null
+//4.1 if categories are the same, return
+//4.2 otherwise, remove the question's categories and all the questioncategories
+//add all the categories(if not exist), questioncategories, the question's categories
+func UpdateQuestionAuth(c *gin.Context, userID string) {
+	var newQuestion entity.Question
+	c.BindJSON(&newQuestion)
+
+	//if the content of the update question is null, return 204: No Content
+	if newQuestion.QuestionText == "" && newQuestion.Categories == nil {
+		c.JSON(http.StatusNoContent, gin.H{
+			"question_id":       newQuestion.ID,
+			"created_timestamp": newQuestion.CreatedTimestamp,
+			"updated_timestamp": newQuestion.UpdatedTimestamp,
+			"user_id":           newQuestion.UserID,
+			"question_text":     newQuestion.QuestionText,
+			"categories":        newQuestion.Categories,
+			"answers":           newQuestion.Answers,
+		})
+		return
+	}
+
+	//get the question id from context
+	questionID, match := c.Params.Get("id")
+	if !match {
+		c.JSON(http.StatusNotFound, gin.H{
+			"err":       "can't get the question id",
+		})
+		return
+	}
+
+	var currQuestion entity.Question
+	//if the update question ID can't be found, return 404: Not Found
+	if err := model.GetQuestionByID(&currQuestion, questionID); err != nil{
+		c.JSON(http.StatusNotFound, gin.H{
+			"question_id":       newQuestion.ID,
+			"created_timestamp": newQuestion.CreatedTimestamp,
+			"updated_timestamp": newQuestion.UpdatedTimestamp,
+			"user_id":           newQuestion.UserID,
+			"question_text":     newQuestion.QuestionText,
+			"categories":        newQuestion.Categories,
+			"answers":           newQuestion.Answers,
+		})
+		return
+	}
+	currQuestion = getAllCategoriesByQuestion(currQuestion)
+
+	//3. update question text if the questiontext input is not null
+	if newQuestion.QuestionText != ""{
+		currQuestion.QuestionText = newQuestion.QuestionText
+		if err := model.UpdateQuestion(&currQuestion,newQuestion.ID); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	//if the question categories input is null, return
+	if newQuestion.Categories == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"question_id":       currQuestion.ID,
+			"created_timestamp": currQuestion.CreatedTimestamp,
+			"updated_timestamp": currQuestion.UpdatedTimestamp,
+			"user_id":           currQuestion.UserID,
+			"question_text":     currQuestion.QuestionText,
+			"categories":        currQuestion.Categories,
+			"answers":           currQuestion.Answers,
+		})
+		return
+	}
+
+	//others, the question categories input is not null:
+	//add unique categories in the newQuestion input to set
+	set := make(map[entity.Category]void)
+	for _, category := range newQuestion.Categories {
+		_, exists := set[category]
+		if !exists {
+			set[category] = member
+		}
+	}
+
+	//if the categories input with the original one are the same, return
+	if reflect.DeepEqual(set, currQuestion.Categories){
+		c.JSON(http.StatusOK, gin.H{
+			"question_id":       currQuestion.ID,
+			"created_timestamp": currQuestion.CreatedTimestamp,
+			"updated_timestamp": currQuestion.UpdatedTimestamp,
+			"user_id":           currQuestion.UserID,
+			"question_text":     currQuestion.QuestionText,
+			"categories":        currQuestion.Categories,
+			"answers":           currQuestion.Answers,
+		})
+		return
+	}
+
+	//4.2 otherwise, remove the question's categories and all the questioncategories
+	if currQuestion.Categories != nil {
+		var questionCategories []entity.QuestionCategory
+		if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, questionID); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		//get all the categories by questionCategories, and add the categories to the question
+		for _, qc := range questionCategories {
+			model.DeleteQuestionCategory(&qc,qc.QuestionID, qc.CategoryID)
+		}
+		currQuestion.Categories = append([]entity.Category{})
+	}
+
+	//add all the categories(if not exist), questioncategories, the question's categories
+	for category := range set {
+		err := model.GetCategoryByName(&category, category.Category)
+		//if the category isn't found, it will return `record not found`
+		if err == nil {
+			fmt.Println("the category: _" + category.Category + "_ already exists, didn't create duplicate category")
+		} else if err.Error() == "record not found" {
+			if err := model.CreateCategory(&category); err != nil {
+				c.JSON(http.StatusNotFound, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		currQuestion.Categories = append(currQuestion.Categories, category)
+		//for each category, create questionCategory with questionID and categoryID
+		var questionCategory entity.QuestionCategory
+		questionCategory.QuestionID = currQuestion.ID
+		questionCategory.CategoryID = category.ID
+		model.UpdateQuestionCategory(&questionCategory)
+	}
+
+	//update the question
+	if err := model.UpdateQuestion(&currQuestion,newQuestion.ID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		return
-	} else {
-		c.JSON(http.StatusOK, gin.H{"data": question})
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"question_id":       currQuestion.ID,
+		"created_timestamp": currQuestion.CreatedTimestamp,
+		"updated_timestamp": currQuestion.UpdatedTimestamp,
+		"user_id":           currQuestion.UserID,
+		"question_text":     currQuestion.QuestionText,
+		"categories":        currQuestion.Categories,
+		"answers":           currQuestion.Answers,
+	})
 }
 
-func UpdateQuestion(c *gin.Context, userID string) {
-	var question entity.Question
-	id := c.Params.ByName("id")
-	err := model.GetQuestionByID(&question, id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": err.Error(),
-		})
-		return
+//check category exists in the category array categories or not, not used for now
+func checkCategoryExistOrNot(category entity.Category, categories []entity.Category) bool {
+	for _,c := range categories {
+		if c.Category == category.Category {
+			return true
+		}
 	}
-	c.BindJSON(&question)
-	err = model.UpdateQuestion(&question, id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": err.Error(),
-		})
-		return
-	} else {
-		c.JSON(http.StatusOK, gin.H{"data": question})
-	}
+	return false
 }
 
-//DeleteQuestion ... Delete the Question
-func DeleteQuestion(c *gin.Context) {
-	var question entity.Question
-	id := c.Params.ByName("id")
-	err := model.DeleteQuestion(&question, id)
-
-	if err != nil {
+//DeleteQuestion ... Delete the Question for authorized user
+//1. get the question according to questionID
+//2. if the question has any answers, can't delete the question
+//3. delete the questioncategory with the questionID
+//3. delete the question
+func DeleteQuestionAuth(c *gin.Context, userID string) {
+	//get the question id from context
+	questionID, match := c.Params.Get("id")
+	if !match {
 		c.JSON(http.StatusNotFound, gin.H{
-			"error": err.Error(),
+			"err":       "can't get the question id",
 		})
 		return
+	}
+
+	var question entity.Question
+	if err := model.GetQuestionByID(&question, questionID); err != nil{
+		c.JSON(http.StatusNotFound, gin.H{
+			"question_id":       question.ID,
+			"created_timestamp": question.CreatedTimestamp,
+			"updated_timestamp": question.UpdatedTimestamp,
+			"user_id":           question.UserID,
+			"question_text":     question.QuestionText,
+			"categories":        question.Categories,
+			"answers":           question.Answers,
+		})
+		return
+	}
+
+	if question.Answers != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"question_id":       question.ID,
+			"created_timestamp": question.CreatedTimestamp,
+			"updated_timestamp": question.UpdatedTimestamp,
+			"user_id":           question.UserID,
+			"question_text":     question.QuestionText,
+			"categories":        question.Categories,
+			"answers":           question.Answers,
+		})
+	}
+
+	var questionCategory entity.QuestionCategory
+	if err := model.GetQuestionCategoryByQuestionID(&questionCategory, questionID); err == nil {
+		if err := model.DeleteQuestionCategoryByQuestionId(&questionCategory,questionID); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"err": err.Error(),
+			})
+			return
+		}
+	}else {
+		fmt.Println("the question doesn't have any categories!")
+	}
+
+	if err := model.DeleteQuestion(&question, questionID); err != nil{
+		c.JSON(http.StatusNotFound, gin.H{
+			"err": err.Error(),
+		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{"id" + id: "is deleted"})
+		c.JSON(http.StatusOK, gin.H{"id" + questionID: "is deleted"})
 	}
 }
