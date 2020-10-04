@@ -18,7 +18,7 @@ func GetCategories(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": categories})
+	c.JSON(http.StatusOK, categories)
 }
 
 //CreateCategory ... Create Category
@@ -32,7 +32,7 @@ func CreateCategory(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		c.JSON(http.StatusCreated, gin.H{"data": category})
+		c.JSON(http.StatusCreated, category)
 	}
 }
 
@@ -47,7 +47,7 @@ func GetCategoryByID(c *gin.Context) {
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"data": category})
+		c.JSON(http.StatusOK, category)
 	}
 }
 
@@ -69,7 +69,7 @@ func UpdateCategory(c *gin.Context) {
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"data": category})
+		c.JSON(http.StatusOK, category)
 	}
 }
 

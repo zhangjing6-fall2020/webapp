@@ -18,7 +18,7 @@ func GetQuestionCategories(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": questionCategories})
+	c.JSON(http.StatusOK, questionCategories)
 }
 
 //CreateQuestionCategory ... Create QuestionCategory
@@ -32,7 +32,7 @@ func CreateQuestionCategory(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		c.JSON(http.StatusCreated, gin.H{"data": questionCategory})
+		c.JSON(http.StatusCreated, questionCategory)
 	}
 }
 
@@ -47,7 +47,7 @@ func GetQuestionCategoryByQuestionID(c *gin.Context) {
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"data": questionCategory})
+		c.JSON(http.StatusOK, questionCategory)
 	}
 }
 
@@ -62,7 +62,7 @@ func GetQuestionCategoryByCategoryID(c *gin.Context) {
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"data": questionCategory})
+		c.JSON(http.StatusOK, questionCategory)
 	}
 }
 
@@ -85,7 +85,7 @@ func UpdateQuestionCategory(c *gin.Context) {
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"data": questionCategory})
+		c.JSON(http.StatusOK, questionCategory)
 	}
 }
 

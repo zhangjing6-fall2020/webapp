@@ -36,6 +36,13 @@ func GetAnswerByID(answer *entity.Answer, id string) (err error) {
 	return nil
 }
 
+func GetAnswersByQuestionID(answers *[]entity.Answer, questionID string)  (err error) {
+	if err = config.DB.Where("question_id = ?", questionID).Find(&answers).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 //UpdateAnswer ... Update Answer
 func UpdateAnswer(answer *entity.Answer, id string) (err error) {
 	answer.UpdatedTimestamp = time.Now()

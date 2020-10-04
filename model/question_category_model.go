@@ -76,6 +76,6 @@ func DeleteQuestionCategoryByQuestionId(questionCategory *entity.QuestionCategor
 	if questionCategory.CategoryID == "" || questionCategory.QuestionID == "" {
 		return errors.New("the QuestionCategory doesn't exist!!!")
 	}
-	config.DB.Where("question_id = ?", questionId).Delete(&questionCategory)
+	config.DB.Where("question_id = ?", questionId).Delete(entity.QuestionCategory{})
 	return nil
 }

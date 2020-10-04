@@ -29,6 +29,13 @@ func getAllCategoriesByQuestion(question entity.Question) entity.Question {
 	return question
 }
 
+func getAllAnswersByQuestion(question entity.Question) entity.Question {
+	if err := model.GetAnswersByQuestionID(&question.Answers, question.ID); err != nil{
+		fmt.Println(err)
+	}
+	return question
+}
+
 //GetQuestions ... Get all Questions
 func GetQuestions(c *gin.Context) {
 	var questions []entity.Question
@@ -44,21 +51,7 @@ func GetQuestions(c *gin.Context) {
 	var questionsWithCategoriesAndAnswers []entity.Question
 	for _,q := range questions {
 		q = getAllCategoriesByQuestion(q)
-		/*var questionCategories []entity.QuestionCategory
-		if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, q.ID); err != nil {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		//get all the categories by questionCategories, and add the categories to the question
-		for _, qc := range questionCategories {
-			var category entity.Category
-			model.GetCategoryByID(&category, qc.CategoryID)
-			q.Categories = append(q.Categories, category)
-		}*/
-
+		q = getAllAnswersByQuestion(q)
 		questionsWithCategoriesAndAnswers = append(questionsWithCategoriesAndAnswers, q)
 	}
 
@@ -67,7 +60,7 @@ func GetQuestions(c *gin.Context) {
 
 //GetQuestionByID ... Get the Question by id
 func GetQuestionByID(c *gin.Context) {
-	id := c.Params.ByName("id")
+	id := c.Params.ByName("question_id")
 	var question entity.Question
 	err := model.GetQuestionByID(&question, id)
 	if err != nil{
@@ -77,25 +70,8 @@ func GetQuestionByID(c *gin.Context) {
 		return
 	}
 
-	/*//get all questionCategories by the questionId
-	var questionCategories []entity.QuestionCategory
-	if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, question.ID); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	//get all the categories by questionCategories, and add the categories to the question
-	for _, qc := range questionCategories {
-		var category entity.Category
-		model.GetCategoryByID(&category, qc.CategoryID)
-		question.Categories = append(question.Categories, category)
-	}*/
-
 	question = getAllCategoriesByQuestion(question)
-
-	//tbd: answers
+	question = getAllAnswersByQuestion(question)
 
 	c.JSON(http.StatusOK, question)
 }
@@ -210,7 +186,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 	}
 
 	//get the question id from context
-	questionID, match := c.Params.Get("id")
+	questionID, match := c.Params.Get("question_id")
 	if !match {
 		c.JSON(http.StatusNotFound, gin.H{
 			"err":       "can't get the question id",
@@ -233,6 +209,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		return
 	}
 	currQuestion = getAllCategoriesByQuestion(currQuestion)
+	currQuestion = getAllAnswersByQuestion(currQuestion)
 
 	//3. update question text if the questiontext input is not null
 	if newQuestion.QuestionText != ""{
@@ -362,7 +339,7 @@ func checkCategoryExistOrNot(category entity.Category, categories []entity.Categ
 //3. delete the question
 func DeleteQuestionAuth(c *gin.Context, userID string) {
 	//get the question id from context
-	questionID, match := c.Params.Get("id")
+	questionID, match := c.Params.Get("question_id")
 	if !match {
 		c.JSON(http.StatusNotFound, gin.H{
 			"err":       "can't get the question id",

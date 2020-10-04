@@ -10,7 +10,7 @@ type Question struct {
 	UpdatedTimestamp time.Time  `json:"updated_timestamp"`
 	QuestionText     string     `json:"question_text"`
 	UserID           string     `json:"user_id"`
-	User             User       `gorm:"ForeignKey:ID;AssociationForeignKey:UserID" json:"user"`
+	User             User       `gorm:"ForeignKey:ID;AssociationForeignKey:UserID" json:"-"`
 	Categories       []Category `json:"categories"`
 	Answers          []Answer   `json:"answers"`
 	//QuestionCategories []QuestionCategory `json:"question_categories"`
