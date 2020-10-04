@@ -1,12 +1,11 @@
 package model
 
 import (
-"cloudcomputing/webapp/config"
-"cloudcomputing/webapp/entity"
-"errors"
-_ "github.com/go-sql-driver/mysql"
-guuid "github.com/google/uuid"
-"time"
+	"cloudcomputing/webapp/config"
+	"cloudcomputing/webapp/entity"
+	"errors"
+	_ "github.com/go-sql-driver/mysql"
+	guuid "github.com/google/uuid"
 )
 
 //GetAllCategories Fetch all category data
@@ -29,6 +28,14 @@ func CreateCategory(category *entity.Category) (err error) {
 //GetCategoryByID ... Fetch only one Category by Id
 func GetCategoryByID(category *entity.Category, id string) (err error) {
 	if err = config.DB.Where("id = ?", id).First(&category).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+//GetCategoryByName ... Fetch only one Category by name
+func GetCategoryByName(category *entity.Category, name string) (err error) {
+	if err = config.DB.Where("category = ?", name).First(&category).Error; err != nil {
 		return err
 	}
 	return nil

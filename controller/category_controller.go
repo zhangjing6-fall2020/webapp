@@ -32,7 +32,7 @@ func CreateCategory(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{"data": category})
+		c.JSON(http.StatusCreated, gin.H{"data": category})
 	}
 }
 

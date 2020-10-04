@@ -32,7 +32,7 @@ func CreateAnswer(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{"data": answer})
+		c.JSON(http.StatusCreated, gin.H{"data": answer})
 	}
 }
 

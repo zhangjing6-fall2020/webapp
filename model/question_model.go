@@ -1,12 +1,12 @@
 package model
 
 import (
-"cloudcomputing/webapp/config"
-"cloudcomputing/webapp/entity"
-"errors"
-_ "github.com/go-sql-driver/mysql"
-guuid "github.com/google/uuid"
-"time"
+	"cloudcomputing/webapp/config"
+	"cloudcomputing/webapp/entity"
+	"errors"
+	_ "github.com/go-sql-driver/mysql"
+	guuid "github.com/google/uuid"
+	"time"
 )
 
 //GetAllQuestions Fetch all question data
@@ -51,4 +51,3 @@ func DeleteQuestion(question *entity.Question, id string) (err error) {
 	config.DB.Where("id = ?", id).Delete(&question)
 	return nil
 }
-

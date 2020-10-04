@@ -55,7 +55,7 @@ func UpdateQuestionCategory(questionCategory *entity.QuestionCategory, questionI
 //DeleteQuestionCategory ... Delete QuestionCategory
 func DeleteQuestionCategory(questionCategory *entity.QuestionCategory, questionId string, categoryId string) (err error) {
 	config.DB.Where("question_id = ? AND category_id = ?", questionId, categoryId).First(&questionCategory)
-	if questionCategory.CategoryID == "" || questionCategory.QuestionID == ""{
+	if questionCategory.CategoryID == "" || questionCategory.QuestionID == "" {
 		return errors.New("the QuestionCategory doesn't exist!!!")
 	}
 	config.DB.Where("question_id = ? AND category_id = ?", questionId, categoryId).Delete(&questionCategory)
