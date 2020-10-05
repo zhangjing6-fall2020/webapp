@@ -13,5 +13,4 @@ type Question struct {
 	User             User       `gorm:"ForeignKey:ID;AssociationForeignKey:UserID" json:"-"`
 	Categories       []Category `json:"categories"`
 	Answers          []Answer   `json:"answers"`
-	//QuestionCategories []QuestionCategory `json:"question_categories"`
 }

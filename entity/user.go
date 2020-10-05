@@ -12,13 +12,4 @@ type User struct {
 	Username       *string    `gorm:"unique;not null" json:"username"`
 	AccountCreated time.Time  `json:"account_created"`
 	AccountUpdated time.Time  `json:"account_updated"`
-	//Questions      []Question `json:"questions"`
-	//Answers        []Answer   `json:"answers"`
 }
-
-//config.DB.Model(&user).Related(&questions)
-//config.DB.Model(&user).Related(&answers)
-//
-//
-//config.DB.Model(&question).Related(&answers)
-//config.DB.Model(&question).Related(&categories)

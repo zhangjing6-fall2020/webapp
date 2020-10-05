@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"reflect"
+	"strings"
 )
 
 type void struct{}
+
 var member void
 
 func getAllCategoriesByQuestion(question entity.Question) entity.Question {
@@ -30,7 +31,7 @@ func getAllCategoriesByQuestion(question entity.Question) entity.Question {
 }
 
 func getAllAnswersByQuestion(question entity.Question) entity.Question {
-	if err := model.GetAnswersByQuestionID(&question.Answers, question.ID); err != nil{
+	if err := model.GetAnswersByQuestionID(&question.Answers, question.ID); err != nil {
 		fmt.Println(err)
 	}
 	return question
@@ -49,7 +50,7 @@ func GetQuestions(c *gin.Context) {
 	}
 
 	var questionsWithCategoriesAndAnswers []entity.Question
-	for _,q := range questions {
+	for _, q := range questions {
 		q = getAllCategoriesByQuestion(q)
 		q = getAllAnswersByQuestion(q)
 		questionsWithCategoriesAndAnswers = append(questionsWithCategoriesAndAnswers, q)
@@ -63,7 +64,7 @@ func GetQuestionByID(c *gin.Context) {
 	id := c.Params.ByName("question_id")
 	var question entity.Question
 	err := model.GetQuestionByID(&question, id)
-	if err != nil{
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -85,6 +86,11 @@ func GetQuestionByID(c *gin.Context) {
 func CreateQuestionAuth(c *gin.Context, userID string) {
 	var question entity.Question
 	c.BindJSON(&question)
+	if question.Categories != nil {
+		for i := range question.Categories {
+			question.Categories[i].Category = strings.ToLower(question.Categories[i].Category)
+		}
+	}
 
 	//get the current user
 	question.UserID = userID
@@ -117,7 +123,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 				})
 				return
 			}
-		}else {
+		} else {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -135,7 +141,6 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 		return
 	}
 	//question.User.Questions = append(question.User.Questions, question)
-
 
 	//for each category, create questionCategory with questionID and categoryID
 	//Attention: can't use set here because category in set doesn't have ID
@@ -164,12 +169,18 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 //2. get the question according to the questionID
 //3. update question text if the questiontext input is not null
 //4. update the question categories if the question categories input is not null
-//4.1 if categories are the same, return
+//4.1 if categories are the same, return: didn't implement
 //4.2 otherwise, remove the question's categories and all the questioncategories
 //add all the categories(if not exist), questioncategories, the question's categories
 func UpdateQuestionAuth(c *gin.Context, userID string) {
 	var newQuestion entity.Question
 	c.BindJSON(&newQuestion)
+
+	if newQuestion.Categories != nil {
+		for i := range newQuestion.Categories {
+			newQuestion.Categories[i].Category = strings.ToLower(newQuestion.Categories[i].Category)
+		}
+	}
 
 	//if the content of the update question is null, return 204: No Content
 	if newQuestion.QuestionText == "" && newQuestion.Categories == nil {
@@ -189,14 +200,14 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 	questionID, match := c.Params.Get("question_id")
 	if !match {
 		c.JSON(http.StatusNotFound, gin.H{
-			"err":       "can't get the question id",
+			"err": "can't get the question id",
 		})
 		return
 	}
 
 	var currQuestion entity.Question
 	//if the update question ID can't be found, return 404: Not Found
-	if err := model.GetQuestionByID(&currQuestion, questionID); err != nil{
+	if err := model.GetQuestionByID(&currQuestion, questionID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"question_id":       newQuestion.ID,
 			"created_timestamp": newQuestion.CreatedTimestamp,
@@ -208,13 +219,20 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		})
 		return
 	}
+	if currQuestion.UserID != userID {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "only the user who posted the question can update the question!",
+		})
+		return
+	}
+
 	currQuestion = getAllCategoriesByQuestion(currQuestion)
 	currQuestion = getAllAnswersByQuestion(currQuestion)
 
 	//3. update question text if the questiontext input is not null
-	if newQuestion.QuestionText != ""{
+	if newQuestion.QuestionText != "" {
 		currQuestion.QuestionText = newQuestion.QuestionText
-		if err := model.UpdateQuestion(&currQuestion,newQuestion.ID); err != nil {
+		if err := model.UpdateQuestion(&currQuestion, newQuestion.ID); err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -246,20 +264,6 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		}
 	}
 
-	//if the categories input with the original one are the same, return
-	if reflect.DeepEqual(set, currQuestion.Categories){
-		c.JSON(http.StatusOK, gin.H{
-			"question_id":       currQuestion.ID,
-			"created_timestamp": currQuestion.CreatedTimestamp,
-			"updated_timestamp": currQuestion.UpdatedTimestamp,
-			"user_id":           currQuestion.UserID,
-			"question_text":     currQuestion.QuestionText,
-			"categories":        currQuestion.Categories,
-			"answers":           currQuestion.Answers,
-		})
-		return
-	}
-
 	//4.2 otherwise, remove the question's categories and all the questioncategories
 	if currQuestion.Categories != nil {
 		var questionCategories []entity.QuestionCategory
@@ -271,7 +275,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		}
 		//get all the categories by questionCategories, and add the categories to the question
 		for _, qc := range questionCategories {
-			model.DeleteQuestionCategory(&qc,qc.QuestionID, qc.CategoryID)
+			model.DeleteQuestionCategory(&qc, qc.QuestionID, qc.CategoryID)
 		}
 		currQuestion.Categories = append([]entity.Category{})
 	}
@@ -304,7 +308,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 	}
 
 	//update the question
-	if err := model.UpdateQuestion(&currQuestion,newQuestion.ID); err != nil {
+	if err := model.UpdateQuestion(&currQuestion, newQuestion.ID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -322,16 +326,6 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 	})
 }
 
-//check category exists in the category array categories or not, not used for now
-func checkCategoryExistOrNot(category entity.Category, categories []entity.Category) bool {
-	for _,c := range categories {
-		if c.Category == category.Category {
-			return true
-		}
-	}
-	return false
-}
-
 //DeleteQuestion ... Delete the Question for authorized user
 //1. get the question according to questionID
 //2. if the question has any answers, can't delete the question
@@ -342,13 +336,13 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 	questionID, match := c.Params.Get("question_id")
 	if !match {
 		c.JSON(http.StatusNotFound, gin.H{
-			"err":       "can't get the question id",
+			"err": "can't get the question id",
 		})
 		return
 	}
 
 	var question entity.Question
-	if err := model.GetQuestionByID(&question, questionID); err != nil{
+	if err := model.GetQuestionByID(&question, questionID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"question_id":       question.ID,
 			"created_timestamp": question.CreatedTimestamp,
@@ -360,32 +354,34 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		})
 		return
 	}
+	if question.UserID != userID {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "only the user who posted the question can delete the question!",
+		})
+		return
+	}
 
+	question = getAllAnswersByQuestion(question)
 	if question.Answers != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"question_id":       question.ID,
-			"created_timestamp": question.CreatedTimestamp,
-			"updated_timestamp": question.UpdatedTimestamp,
-			"user_id":           question.UserID,
-			"question_text":     question.QuestionText,
-			"categories":        question.Categories,
-			"answers":           question.Answers,
+			"error":             "the question with answers can't be deleted!",
 		})
+		return
 	}
 
 	var questionCategory entity.QuestionCategory
 	if err := model.GetQuestionCategoryByQuestionID(&questionCategory, questionID); err == nil {
-		if err := model.DeleteQuestionCategoryByQuestionId(&questionCategory,questionID); err != nil {
+		if err := model.DeleteQuestionCategoryByQuestionId(&questionCategory, questionID); err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"err": err.Error(),
 			})
 			return
 		}
-	}else {
+	} else {
 		fmt.Println("the question doesn't have any categories!")
 	}
 
-	if err := model.DeleteQuestion(&question, questionID); err != nil{
+	if err := model.DeleteQuestion(&question, questionID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": err.Error(),
 		})
