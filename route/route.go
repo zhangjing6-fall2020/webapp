@@ -16,6 +16,7 @@ func SetupRouter() *gin.Engine {
 	//get all the users
 	pub.GET("users", controller.GetUsers)
 	//pub.GET("/user/:email_address", controller.GetUserByEmail)
+	//pub.GET("user/:id", controller.GetUserByID)
 	pub.GET("user/:id", controller.GetUserByID)
 	//delete the user given UserID
 	pub.DELETE("user/:id", controller.DeleteUser)
@@ -31,9 +32,10 @@ func SetupRouter() *gin.Engine {
 	//authorized endpoints, basic auth is required with username and password
 	authorized := r.Group("/v1", auth.BasicAuth())
 	//get the information of the authorized user
-	authorized.GET("user/self", func(c *gin.Context) {
+	authorized.GET("userself", func(c *gin.Context) {
 		controller.GetUserByUsername(c, auth.GetCurrUsername())
 	})
+
 	//edit the information of the authorized user
 	authorized.PUT("user/self", func(c *gin.Context) {
 		controller.UpdateAuthorizedUser(c, auth.GetCurrUsername())
@@ -53,7 +55,7 @@ func SetupRouter() *gin.Engine {
 	})
 
 	//answer a question
-	authorized.POST("question/:question_id", func(c *gin.Context) {
+	authorized.POST("question/:question_id/answer", func(c *gin.Context) {
 		controller.CreateAnswer(c, auth.GetCurrentUserID())
 	})
 	//update a question's answer
