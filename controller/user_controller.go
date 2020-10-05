@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 
 //GetUsers ... Get all users
 func GetUsers(c *gin.Context) {
-	var users []model.User
+	var users []entity.User
 	err := model.GetAllUsers(&users)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -31,10 +32,10 @@ func GetUsers(c *gin.Context) {
 
 //CreateUser ... Create User
 func CreateUser(c *gin.Context) {
-	var user model.User
+	var user entity.User
 	c.BindJSON(&user)
 
-	var checkUser model.User
+	var checkUser entity.User
 	if err := model.GetUserByUsername(&checkUser, *user.Username); err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "the email has been registered!",
@@ -48,7 +49,7 @@ func CreateUser(c *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusCreated, gin.H{
 			"id":              user.ID,
 			"first_name":      user.FirstName,
 			"last_name":       user.LastName,
@@ -62,7 +63,7 @@ func CreateUser(c *gin.Context) {
 //GetUserByID ... Get the user by id
 func GetUserByID(c *gin.Context) {
 	id := c.Params.ByName("id")
-	var user model.User
+	var user entity.User
 	err := model.GetUserByID(&user, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -81,10 +82,10 @@ func GetUserByID(c *gin.Context) {
 	}
 }
 
-//GetUserByID ... Get the user by id
-func GetUserByUsername(c *gin.Context) {
-	username := c.Params.ByName("username")
-	var user model.User
+//GetUserByUsername ... Get the user by username
+//Used in authorized get method endpoint: "/user/self"
+func GetUserByUsername(c *gin.Context, username string) {
+	var user entity.User
 	err := model.GetUserByUsername(&user, username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -103,9 +104,69 @@ func GetUserByUsername(c *gin.Context) {
 	}
 }
 
+//UpdateAuthorizedUser ... update the user
+//Used in authorized put method endpoint: "/user/self"
+func UpdateAuthorizedUser(c *gin.Context,username string)  {
+	var user entity.User
+	err := model.GetUserByUsername(&user, username)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+	}
+	//get the authorized user information
+	oriID := user.ID
+	var oriUsername string = *user.Username
+	oriCreatedTime := user.AccountCreated
+	oriPwd := user.Password
+	c.BindJSON(&user)
+
+	//if the user wants to change id, username or create time, it's not allowed
+	if user.ID != oriID || *user.Username != oriUsername || user.AccountCreated != oriCreatedTime {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "id, username and AccountCreated are readonly!!!",
+		})
+		return
+	} else if oriPwd == user.Password {
+		//if the user isn't updating password, don't need to check the password
+		err = model.UpdateUserWithSamePwd(&user, user.ID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"id":              user.ID,
+				"first_name":      user.FirstName,
+				"last_name":       user.LastName,
+				"username":        user.Username,
+				"account_created": user.AccountCreated,
+				"account_updated": user.AccountUpdated,
+			})
+		}
+	} else {
+		//if the user is updating password, do check the password
+		err = model.UpdateUserWithDiffPwd(&user, user.ID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"id":              user.ID,
+				"first_name":      user.FirstName,
+				"last_name":       user.LastName,
+				"username":        user.Username,
+				"account_created": user.AccountCreated,
+				"account_updated": user.AccountUpdated,
+			})
+		}
+	}
+}
+
 //UpdateUser ... Update the user information
 func UpdateUserWithSamePwd(c *gin.Context) {
-	var user model.User
+	var user entity.User
 	id := c.Params.ByName("id")
 	err := model.GetUserByID(&user, id)
 	if err != nil {
@@ -134,7 +195,7 @@ func UpdateUserWithSamePwd(c *gin.Context) {
 }
 
 func UpdateUserWithDiffPwd(c *gin.Context) {
-	var user model.User
+	var user entity.User
 	id := c.Params.ByName("id")
 	err := model.GetUserByID(&user, id)
 	if err != nil {
@@ -164,7 +225,7 @@ func UpdateUserWithDiffPwd(c *gin.Context) {
 
 //DeleteUser ... Delete the user
 func DeleteUser(c *gin.Context) {
-	var user model.User
+	var user entity.User
 	id := c.Params.ByName("id")
 	err := model.DeleteUser(&user, id)
 

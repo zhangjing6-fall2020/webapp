@@ -2,7 +2,7 @@ package main
 
 import (
 	"cloudcomputing/webapp/config"
-	"cloudcomputing/webapp/model"
+	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/route"
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -17,16 +17,15 @@ func main() {
 	}
 	defer config.DB.Close()
 
-	config.DB.AutoMigrate(&model.User{})
-
-	/*user := model.User{ID: "6", FirstName: "jin", LastName: "z", Password: "123",
-		EmailAddress: "123@gmail.com", AccountCreated: time.Now(), AccountUpdated: time.Now()}
-	if err = config.DB.Create(&user).Error; err != nil {
-		fmt.Println("Create User error: ", err)
-	}*/
+	config.DB.AutoMigrate(&entity.User{})
+	config.DB.AutoMigrate(&entity.Question{}).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
+	config.DB.AutoMigrate(&entity.Answer{}).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT").AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT")
+	config.DB.AutoMigrate(&entity.Category{})
+	config.DB.AutoMigrate(&entity.QuestionCategory{}).AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT").AddForeignKey("category_id", "categories(id)", "RESTRICT", "RESTRICT")
 
 	r := route.SetupRouter()
 
 	//running
 	r.Run()
 }
+
