@@ -92,6 +92,12 @@ func UpdateAnswer(c *gin.Context, userID string) {
 		})
 		return
 	}
+	if question.UserID != userID {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "only the user who post the answer can update the answer!",
+		})
+		return
+	}
 
 	answerID := c.Params.ByName("answer_id")
 	var currAnswer entity.Answer
@@ -133,6 +139,13 @@ func DeleteAnswer(c *gin.Context, userID string) {
 	if err := model.GetQuestionByID(&question, questionID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
+		})
+		return
+	}
+
+	if question.UserID != userID {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "only the user who post the answer can delete the answer!",
 		})
 		return
 	}

@@ -362,9 +362,9 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 	}
 
 	question = getAllAnswersByQuestion(question)
-	if question.Answers != nil {
+	if len(question.Answers) != 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":             "the question with answers can't be deleted!",
+			"error": "the question with answers can't be deleted!",
 		})
 		return
 	}
