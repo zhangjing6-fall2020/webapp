@@ -63,28 +63,23 @@ func CreateAnswer(c *gin.Context, userID string) {
 
 //GetAnswerByID ... Get the answer by id
 func GetAnswerByID(c *gin.Context) {
-	questionID := c.Params.ByName("question_id")
-	var question entity.Question
-	model.GetQuestionByID(&question, questionID)
-
 	answerID := c.Params.ByName("answer_id")
 	var answer entity.Answer
-	err := model.GetAnswerByID(&answer, answerID)
-	if err != nil {
+	if err := model.GetAnswerByID(&answer, answerID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		return
-	} else {
-		c.JSON(http.StatusOK, answer)
 	}
-}
-
-func UpdateAnswer(c *gin.Context, userID string) {
-	var newAnswer entity.Answer
-	c.BindJSON(&newAnswer)
 
 	questionID := c.Params.ByName("question_id")
+	if answer.QuestionID != questionID {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "The answer id and question id don't match!!!",
+		})
+		return
+	}
+
 	var question entity.Question
 	if err := model.GetQuestionByID(&question, questionID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -92,16 +87,40 @@ func UpdateAnswer(c *gin.Context, userID string) {
 		})
 		return
 	}
-	if question.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "only the user who post the answer can update the answer!",
-		})
-		return
-	}
+
+	c.JSON(http.StatusOK, answer)
+}
+
+func UpdateAnswer(c *gin.Context, userID string) {
+	var newAnswer entity.Answer
+	c.BindJSON(&newAnswer)
 
 	answerID := c.Params.ByName("answer_id")
 	var currAnswer entity.Answer
 	if err := model.GetAnswerByID(&currAnswer, answerID); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if currAnswer.UserID != userID {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "only the user who post the answer can delete the answer!",
+		})
+		return
+	}
+
+	questionID := c.Params.ByName("question_id")
+	if currAnswer.QuestionID != questionID {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "The answer id and question id don't match!!!",
+		})
+		return
+	}
+
+	var question entity.Question
+	if err := model.GetQuestionByID(&question, questionID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -118,8 +137,9 @@ func UpdateAnswer(c *gin.Context, userID string) {
 
 	if currAnswer.AnswerText == newAnswer.AnswerText {
 		c.JSON(http.StatusOK, gin.H{
-			"err": "the answerText is the same, no need to update1",
+			"err": "the answerText is the same, no need to update!",
 		})
+		return
 	}
 	currAnswer.AnswerText = newAnswer.AnswerText
 	if err := model.UpdateAnswer(&currAnswer, answerID);err != nil {
@@ -143,13 +163,6 @@ func DeleteAnswer(c *gin.Context, userID string) {
 		return
 	}
 
-	if question.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "only the user who post the answer can delete the answer!",
-		})
-		return
-	}
-
 	answerID := c.Params.ByName("answer_id")
 	var answer entity.Answer
 	if err := model.GetAnswerByID(&answer, answerID); err != nil {
@@ -159,10 +172,16 @@ func DeleteAnswer(c *gin.Context, userID string) {
 		return
 	}
 
-	answer.UserID = userID
-	if err := model.GetUserByID(&answer.User, userID); err != nil{
+	if answer.UserID != userID {
 		c.JSON(http.StatusNotFound, gin.H{
-			"err":       "can't get the question id",
+			"error": "only the user who post the answer can delete the answer!",
+		})
+		return
+	}
+
+	if answer.QuestionID != questionID {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "The answer id and question id don't match!!!",
 		})
 		return
 	}
