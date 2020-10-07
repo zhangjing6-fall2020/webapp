@@ -18,3 +18,13 @@ Changes from a2 to a3:
 - Table `user` changes to `users`
 - Endpoint get: `/v1/user/self` changes to `v1/userself`
 - Endpoint get: `v1/user` changes to `v1/users`
+
+a3 demo procedure:
+- add two users, a and b
+- add a question for a user
+- add an answer for a user
+- user b can't edit the answer
+- user b can't delete the question
+- user a can't delete the question due to answer exists
+- user a delete the answer
+- user a delete the question
