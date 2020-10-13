@@ -20,7 +20,7 @@ func BuildDBConfig() *DBConfig {
 		Host:     "localhost",
 		Port:     3306,
 		User:     "root",
-		Password: "20190904",
+		Password: "MysqlPwd123",
 		DBName:   "user_story",
 	}
 	return &dbConfig
