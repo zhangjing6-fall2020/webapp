@@ -1,4 +1,7 @@
 # webapp
+
+webapp running at port: 8080
+
 Instructions:
 1. Prerequisites for building and deploying your application locally.
     - Install [Golang](https://golang.org/dl/)
@@ -6,6 +9,7 @@ Instructions:
     - Install the dependencies listed in go.mod(optional)
 2. Build and Deploy instructions for web application.
     - Build: `go build`
+    - Build for ubuntu: `env GOOS=linux GOARCH=amd64 go build`
     - Test: `go test ./...`
     - Run: `go run main.go`
 
@@ -28,3 +32,6 @@ a3 demo procedure:
 - user a can't delete the question due to answer exists
 - user a delete the answer
 - user a delete the question
+
+Changes from a3 to a4:
+- No development, just change category to unique
