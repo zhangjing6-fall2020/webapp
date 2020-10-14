@@ -115,7 +115,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 		err := model.GetCategoryByName(&category, category.Category)
 		//if the category isn't found, it will return `record not found`
 		if err == nil {
-			fmt.Println("the category" + category.Category + "already exists")
+			fmt.Println("the category: _" + category.Category + "_ already exists")
 		} else if err.Error() == "record not found" {
 			if err := model.CreateCategory(&category); err != nil {
 				c.JSON(http.StatusNotFound, gin.H{
