@@ -38,6 +38,13 @@ func GetAnswerFileByAnswerID(answerFile *entity.AnswerFile, answerID string) (er
 	return nil
 }
 
+func GetAllAnswerFilesByAnswerID(answerFiles *[]entity.AnswerFile, answerID string) (err error) {
+	if err = config.DB.Where("answer_id = ?", answerID).Find(&answerFiles).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 //DeleteAnswerFileByID ... Delete AnswerFile by ID
 func DeleteAnswerFileByID(answerFile *entity.AnswerFile, fileID string, answerID string) (err error) {
 	config.DB.Where("id = ? AND answer_id = ?", fileID, answerID).First(&answerFile)

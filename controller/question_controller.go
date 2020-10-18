@@ -31,9 +31,17 @@ func getAllCategoriesByQuestion(question entity.Question) entity.Question {
 }
 
 func getAllAnswersByQuestion(question entity.Question) entity.Question {
-	if err := model.GetAnswersByQuestionID(&question.Answers, question.ID); err != nil {
+	var answers []entity.Answer
+	err := model.GetAnswersByQuestionID(&answers, question.ID)
+	if err != nil {
 		fmt.Println(err)
+	}else{
+		for _, a := range answers {
+			a = getAllFilesByAnswer(a)
+			question.Answers = append(question.Answers, a)
+		}
 	}
+
 	return question
 }
 
@@ -246,6 +254,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 
 	currQuestion = getAllCategoriesByQuestion(currQuestion)
 	currQuestion = getAllAnswersByQuestion(currQuestion)
+	currQuestion = getAllFilesByQuestion(currQuestion)
 
 	//3. update question text if the questiontext input is not null
 	if newQuestion.QuestionText != "" {

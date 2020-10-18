@@ -3,9 +3,26 @@ package controller
 import (
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
+
+func getAllFilesByAnswer(answer entity.Answer) entity.Answer {
+	var answerFiles []entity.AnswerFile
+	if err := model.GetAllAnswerFilesByAnswerID(&answerFiles, answer.ID); err != nil{
+		fmt.Println(err)
+	}
+	for _, af := range answerFiles {
+		var file entity.File
+		if err := model.GetFileByID(&file, af.ID);err != nil{
+			fmt.Println(err)
+		}
+		answer.Attachments = append(answer.Attachments, file)
+	}
+
+	return answer
+}
 
 //GetAnswers ... Get all Answers
 func GetAnswers(c *gin.Context) {
@@ -16,9 +33,12 @@ func GetAnswers(c *gin.Context) {
 			"error": err.Error(),
 		})
 		return
+	}else{
+		for _, a := range answers {
+			a = getAllFilesByAnswer(a)
+		}
+		c.JSON(http.StatusOK, answers)
 	}
-
-	c.JSON(http.StatusOK, answers)
 }
 
 //CreateAnswer ... Create Answer
@@ -86,6 +106,8 @@ func GetAnswerByID(c *gin.Context) {
 		return
 	}
 
+	answer = getAllFilesByAnswer(answer)
+
 	c.JSON(http.StatusOK, answer)
 }
 
@@ -146,6 +168,7 @@ func UpdateAnswer(c *gin.Context, userID string) {
 		})
 		return
 	} else {
+		currAnswer = getAllFilesByAnswer(currAnswer)
 		c.JSON(http.StatusOK, currAnswer)
 	}
 }
