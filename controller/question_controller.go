@@ -408,6 +408,14 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		fmt.Println("the question doesn't have any categories!")
 	}
 
+	question = getAllFilesByQuestion(question)
+	if len(question.Attachments) != 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "question with files can't be deleted!!!",
+		})
+		return
+	}
+
 	if err := model.DeleteQuestion(&question, questionID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": err.Error(),

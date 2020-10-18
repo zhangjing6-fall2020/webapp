@@ -207,6 +207,14 @@ func DeleteAnswer(c *gin.Context, userID string) {
 		return
 	}
 
+	answer = getAllFilesByAnswer(answer)
+	if len(answer.Attachments) != 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "answer with files can't be deleted!!!",
+		})
+		return
+	}
+
 	err := model.DeleteAnswer(&answer, answerID)
 
 	if err != nil {
