@@ -7,8 +7,8 @@ import (
 )
 
 //GetAllQuestionFiles Fetch all QuestionFile data
-func GetAllQuestionFiles(questionFile *[]entity.QuestionFile) (err error) {
-	if err = config.DB.Find(&questionFile).Error; err != nil {
+func GetAllQuestionFiles(questionFiles *[]entity.QuestionFile) (err error) {
+	if err = config.DB.Find(&questionFiles).Error; err != nil {
 		return err
 	}
 	return nil
@@ -38,14 +38,15 @@ func GetQuestionFileByQuestionID(questionFile *entity.QuestionFile, questionID s
 	return nil
 }
 
+func GetAllQuestionFilesByQuestionID(questionFiles *[]entity.QuestionFile, questionID string) (err error) {
+	if err = config.DB.Where("question_id = ?", questionID).Find(&questionFiles).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 //DeleteQuestionFileByID ... Delete QuestionFile by ID
 func DeleteQuestionFileByID(questionFile *entity.QuestionFile, fileID string, questionID string) (err error) {
-	if config.DB.Where("id = ?", fileID).First(&questionFile); questionFile.ID == "" {
-		return errors.New("the file doesn't exist!!!")
-	}
-	config.DB.Where("id = ?", fileID).Delete(&questionFile)
-	return nil
-
 	config.DB.Where("id = ? AND question_id = ?", fileID, questionID).First(&questionFile)
 	if questionFile.ID == "" || questionFile.QuestionID == "" {
 		return errors.New("the QuestionFile doesn't exist!!!")

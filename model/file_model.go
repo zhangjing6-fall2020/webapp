@@ -18,6 +18,15 @@ func GetAllFiles(file *[]entity.File) (err error) {
 }
 
 //CreateFile ... Insert New data
+func CreateFileAuth(file *entity.File) (err error) {
+	file.CreatedDate = time.Now()
+	if err = config.DB.Create(&file).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+//CreateFile ... Insert New data
 func CreateFile(file *entity.File, questionOrAnswerID string) (err error) {
 	file.ID = guuid.New().String()
 	file.CreatedDate = time.Now()

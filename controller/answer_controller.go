@@ -57,8 +57,6 @@ func CreateAnswer(c *gin.Context, userID string) {
 	} else {
 		c.JSON(http.StatusCreated, answer)
 	}
-
-
 }
 
 //GetAnswerByID ... Get the answer by id

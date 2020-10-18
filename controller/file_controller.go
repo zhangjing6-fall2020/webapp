@@ -6,20 +6,13 @@ import (
 	"cloudcomputing/webapp/tool"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	guuid "github.com/google/uuid"
 	"net/http"
 )
 
 const bucketName string = "webapp.jing.zhang"
 
 func CreateQuestionFileAuth(c *gin.Context, userID string) {
-	fileHeader, err := c.FormFile("image")
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
 	//get the current user
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
@@ -30,6 +23,7 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 		return
 	}
 
+	//verify the userID
 	if question.UserID != userID {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "the question is not created by the user!!!",
@@ -37,11 +31,33 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 		return
 	}
 
-	//create the file data
+	//get the image
+	fileHeader, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	//upload the file to s3
 	var file entity.File
+	file.ID = guuid.New().String()
 	file.FileName = fileHeader.Filename
+	file.S3ObjectName = fmt.Sprintf("%s/%s/%s", questionID, file.ID, file.FileName)
+	tool.UploadFile(bucketName, fileHeader, file.S3ObjectName)
+
+	//get S3 metadata
+	metadata := tool.GetObjectMetaData(bucketName, file.S3ObjectName)
+	file.AcceptRanges = *metadata.AcceptRanges
+	file.ContentLength = *metadata.ContentLength
+	file.ContentType = *metadata.ContentType
+	file.ETag = *metadata.ETag
+	file.LastModified = *metadata.LastModified
+
+	//create the file data
 	file.IsQuestion = true
-	if err := model.CreateFile(&file, questionID); err != nil {
+	if err := model.CreateFileAuth(&file); err != nil {
 		fmt.Println("can't create the file!")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -49,15 +65,8 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 		return
 	}
 
-	//upload the file to s3
-	tool.UploadFile(bucketName, fileHeader, file.S3ObjectName)
-
 	//update Attachments in question
-	question.Attachments = append(question.Attachments, file)
-
-	//get S3 metadata
-
-	//update file
+	//question.Attachments = append(question.Attachments, file)
 
 	//create the question file data
 	var questionFile entity.QuestionFile
@@ -87,6 +96,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 		return
 	}
 
+	//verify the user
 	if question.UserID != userID {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "the question is not created by the user!!!",

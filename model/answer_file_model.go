@@ -40,12 +40,6 @@ func GetAnswerFileByAnswerID(answerFile *entity.AnswerFile, answerID string) (er
 
 //DeleteAnswerFileByID ... Delete AnswerFile by ID
 func DeleteAnswerFileByID(answerFile *entity.AnswerFile, fileID string, answerID string) (err error) {
-	if config.DB.Where("id = ?", fileID).First(&answerFile); answerFile.ID == "" {
-		return errors.New("the file doesn't exist!!!")
-	}
-	config.DB.Where("id = ?", fileID).Delete(&answerFile)
-	return nil
-
 	config.DB.Where("id = ? AND answer_id = ?", fileID, answerID).First(&answerFile)
 	if answerFile.ID == "" || answerFile.AnswerID == "" {
 		return errors.New("the AnswerFile doesn't exist!!!")

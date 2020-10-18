@@ -37,6 +37,22 @@ func getAllAnswersByQuestion(question entity.Question) entity.Question {
 	return question
 }
 
+func getAllFilesByQuestion(question entity.Question) entity.Question {
+	var questionFiles []entity.QuestionFile
+	if err := model.GetAllQuestionFilesByQuestionID(&questionFiles, question.ID); err != nil{
+		fmt.Println(err)
+	}
+	for _, qf := range questionFiles {
+		var file entity.File
+		if err := model.GetFileByID(&file, qf.ID);err != nil{
+			fmt.Println(err)
+		}
+		question.Attachments = append(question.Attachments, file)
+	}
+
+	return question
+}
+
 //GetQuestions ... Get all Questions
 func GetQuestions(c *gin.Context) {
 	var questions []entity.Question
@@ -53,6 +69,7 @@ func GetQuestions(c *gin.Context) {
 	for _, q := range questions {
 		q = getAllCategoriesByQuestion(q)
 		q = getAllAnswersByQuestion(q)
+		q = getAllFilesByQuestion(q)
 		questionsWithCategoriesAndAnswers = append(questionsWithCategoriesAndAnswers, q)
 	}
 
@@ -73,6 +90,7 @@ func GetQuestionByID(c *gin.Context) {
 
 	question = getAllCategoriesByQuestion(question)
 	question = getAllAnswersByQuestion(question)
+	question = getAllFilesByQuestion(question)
 
 	c.JSON(http.StatusOK, question)
 }
