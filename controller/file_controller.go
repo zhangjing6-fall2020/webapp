@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-const bucketName string = "webapp.jing.zhang"
+var bucketName string = tool.GetBucketName()//"webapp.jing.zhang"
 
 func CreateQuestionFileAuth(c *gin.Context, userID string) {
 	//get the current user

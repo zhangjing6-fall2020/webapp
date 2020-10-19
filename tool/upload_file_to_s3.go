@@ -21,6 +21,10 @@ func exitErrorf(msg string, args ...interface{}) {
 var sess *session.Session
 var svc *s3.S3
 
+func GetBucketName() string {
+	return os.Getenv("Bucket_Name")
+}
+
 //Create a session using the setup Region and credentials
 //https://docs.aws.amazon.com/sdk-for-go/api/aws/session/
 func initSession() *session.Session {
