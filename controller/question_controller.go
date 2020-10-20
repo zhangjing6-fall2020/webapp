@@ -3,6 +3,7 @@ package controller
 import (
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
+	"cloudcomputing/webapp/tool"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -410,10 +411,25 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 
 	question = getAllFilesByQuestion(question)
 	if len(question.Attachments) != 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "question with files can't be deleted!!!",
-		})
-		return
+		for _,q := range question.Attachments {
+			var questionFile entity.QuestionFile
+			if err := model.DeleteQuestionFileByID(&questionFile,q.ID,questionID);err != nil{
+				c.JSON(http.StatusNotFound, gin.H{
+					"info": "can't delete the question file",
+					"err": err.Error(),
+				})
+				return
+			}
+			tool.DeleteFile(tool.GetBucketName(), q.S3ObjectName)
+			if err := model.DeleteFile(&q,q.ID);err != nil {
+				c.JSON(http.StatusNotFound, gin.H{
+					"info": "can't delete the file",
+					"err": err.Error(),
+				})
+				return
+			}
+		}
+		question.Attachments = nil
 	}
 
 	if err := model.DeleteQuestion(&question, questionID); err != nil {

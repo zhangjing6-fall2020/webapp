@@ -1,6 +1,7 @@
 package config
 
 import (
+	"cloudcomputing/webapp/tool"
 	"fmt"
 	"github.com/jinzhu/gorm"
 )
@@ -17,11 +18,11 @@ type DBConfig struct {
 
 func BuildDBConfig() *DBConfig {
 	dbConfig := DBConfig{
-		Host:     "localhost",
+		Host:     tool.GetHostname(),//"localhost",
 		Port:     3306,
-		User:     "root",
-		Password: "MysqlPwd123",
-		DBName:   "user_story22",
+		User:     tool.GetDBUserName(),//"root",
+		Password: tool.GetDBPassword(),//"MysqlPwd123",
+		DBName:   "user_story",
 	}
 	return &dbConfig
 }

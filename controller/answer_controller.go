@@ -3,6 +3,7 @@ package controller
 import (
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
+	"cloudcomputing/webapp/tool"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -209,10 +210,26 @@ func DeleteAnswer(c *gin.Context, userID string) {
 
 	answer = getAllFilesByAnswer(answer)
 	if len(answer.Attachments) != 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "answer with files can't be deleted!!!",
-		})
-		return
+		for _,a := range answer.Attachments{
+			var answerFile entity.AnswerFile
+			if err := model.DeleteAnswerFileByID(&answerFile,a.ID,answerID);err != nil{
+				c.JSON(http.StatusNotFound, gin.H{
+					"info": "can't delete the answer file",
+					"err": err.Error(),
+				})
+				return
+			}
+			tool.DeleteFile(tool.GetBucketName(), a.S3ObjectName)
+			if err := model.DeleteFile(&a,a.ID);err != nil {
+				c.JSON(http.StatusNotFound, gin.H{
+					"info": "can't delete the file",
+					"err": err.Error(),
+				})
+				return
+			}
+		}
+
+		answer.Attachments = nil
 	}
 
 	err := model.DeleteAnswer(&answer, answerID)
