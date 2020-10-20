@@ -21,7 +21,7 @@ func BuildDBConfig() *DBConfig {
 		Port:     3306,
 		User:     "root",
 		Password: "MysqlPwd123",
-		DBName:   "user_story",
+		DBName:   "user_story22",
 	}
 	return &dbConfig
 }
