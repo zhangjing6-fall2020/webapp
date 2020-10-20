@@ -5,8 +5,8 @@ webapp running at port: 8080
 webapp design logic:
 - question with any answers cannot be deleted
 - the categories won't be deleted if the question is deleted
-- question with any files cannot be deleted
-- answer with any files cannot be deleted
+- delete question will delete all the files attached to it
+- delete answer will delete all the files attached to it
 
 Instructions:
 1. Prerequisites for building and deploying your application locally.
