@@ -1,6 +1,9 @@
 package tool
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 //Database username, password, hostname, and S3 bucket name get from ec2 instance
 func GetBucketName() string {
@@ -16,5 +19,10 @@ func GetDBPassword() string {
 }
 
 func GetHostname() string {
-	return os.Getenv("HOSTNAME")
+	hostname := os.Getenv("HOSTNAME")
+	return strings.TrimRight(hostname,":3306")
+}
+
+func GetEnvVar(env string) string {
+	return os.Getenv(env)
 }
