@@ -6,9 +6,16 @@ import (
 )
 
 //Database username, password, hostname, and S3 bucket name get from ec2 instance
+//ec2
 func GetBucketName() string {
 	return os.Getenv("BUCKET_NAME")
 }
+
+/*
+//local
+func GetBucketName() string {
+	return "webapp.jing.zhang"
+}*/
 
 func GetDBUserName() string {
 	return os.Getenv("DB_USERNAME")

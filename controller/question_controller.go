@@ -420,7 +420,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 				})
 				return
 			}
-			tool.DeleteFile(tool.GetEnvVar("BUCKET_NAME"), q.S3ObjectName)
+			tool.DeleteFile(tool.GetBucketName(), q.S3ObjectName)
 			if err := model.DeleteFile(&q,q.ID);err != nil {
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file",
