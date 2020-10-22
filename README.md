@@ -2,6 +2,12 @@
 
 webapp running at port: 8080
 
+webapp design logic:
+- question with any answers cannot be deleted
+- the categories won't be deleted if the question is deleted
+- delete question will delete all the files attached to it
+- delete answer will delete all the files attached to it
+
 Instructions:
 1. Prerequisites for building and deploying your application locally.
     - Install [Golang](https://golang.org/dl/)
@@ -35,3 +41,8 @@ a3 demo procedure:
 
 Changes from a3 to a4:
 - No development, just change category to unique
+
+Changes from a4 to a5:
+- add file, answer file, question file
+- post file: upload the file to S3 and database
+- delete file: delete the file from S3 and database

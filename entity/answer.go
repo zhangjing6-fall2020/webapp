@@ -13,4 +13,5 @@ type Answer struct {
 	User             User      `gorm:"ForeignKey:ID;AssociationForeignKey:UserID" json:"-"`
 	QuestionID       string    `json:"question_id"`
 	Question         Question  `gorm:"ForeignKey:ID;AssociationForeignKey:QuestionID" json:"-"`
+	Attachments      []File     `json:"attachments"`
 }

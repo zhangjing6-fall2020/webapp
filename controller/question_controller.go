@@ -3,6 +3,7 @@ package controller
 import (
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
+	"cloudcomputing/webapp/tool"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -31,9 +32,33 @@ func getAllCategoriesByQuestion(question entity.Question) entity.Question {
 }
 
 func getAllAnswersByQuestion(question entity.Question) entity.Question {
-	if err := model.GetAnswersByQuestionID(&question.Answers, question.ID); err != nil {
+	var answers []entity.Answer
+	err := model.GetAnswersByQuestionID(&answers, question.ID)
+	if err != nil {
+		fmt.Println(err)
+	}else{
+		for _, a := range answers {
+			a = getAllFilesByAnswer(a)
+			question.Answers = append(question.Answers, a)
+		}
+	}
+
+	return question
+}
+
+func getAllFilesByQuestion(question entity.Question) entity.Question {
+	var questionFiles []entity.QuestionFile
+	if err := model.GetAllQuestionFilesByQuestionID(&questionFiles, question.ID); err != nil{
 		fmt.Println(err)
 	}
+	for _, qf := range questionFiles {
+		var file entity.File
+		if err := model.GetFileByID(&file, qf.ID);err != nil{
+			fmt.Println(err)
+		}
+		question.Attachments = append(question.Attachments, file)
+	}
+
 	return question
 }
 
@@ -53,6 +78,7 @@ func GetQuestions(c *gin.Context) {
 	for _, q := range questions {
 		q = getAllCategoriesByQuestion(q)
 		q = getAllAnswersByQuestion(q)
+		q = getAllFilesByQuestion(q)
 		questionsWithCategoriesAndAnswers = append(questionsWithCategoriesAndAnswers, q)
 	}
 
@@ -73,6 +99,7 @@ func GetQuestionByID(c *gin.Context) {
 
 	question = getAllCategoriesByQuestion(question)
 	question = getAllAnswersByQuestion(question)
+	question = getAllFilesByQuestion(question)
 
 	c.JSON(http.StatusOK, question)
 }
@@ -228,6 +255,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 
 	currQuestion = getAllCategoriesByQuestion(currQuestion)
 	currQuestion = getAllAnswersByQuestion(currQuestion)
+	currQuestion = getAllFilesByQuestion(currQuestion)
 
 	//3. update question text if the questiontext input is not null
 	if newQuestion.QuestionText != "" {
@@ -379,6 +407,29 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		}
 	} else {
 		fmt.Println("the question doesn't have any categories!")
+	}
+
+	question = getAllFilesByQuestion(question)
+	if len(question.Attachments) != 0 {
+		for _,q := range question.Attachments {
+			var questionFile entity.QuestionFile
+			if err := model.DeleteQuestionFileByID(&questionFile,q.ID,questionID);err != nil{
+				c.JSON(http.StatusNotFound, gin.H{
+					"info": "can't delete the question file",
+					"err": err.Error(),
+				})
+				return
+			}
+			tool.DeleteFile(tool.GetBucketName(), q.S3ObjectName)
+			if err := model.DeleteFile(&q,q.ID);err != nil {
+				c.JSON(http.StatusNotFound, gin.H{
+					"info": "can't delete the file",
+					"err": err.Error(),
+				})
+				return
+			}
+		}
+		question.Attachments = nil
 	}
 
 	if err := model.DeleteQuestion(&question, questionID); err != nil {

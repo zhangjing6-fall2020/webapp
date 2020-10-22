@@ -3,9 +3,27 @@ package controller
 import (
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
+	"cloudcomputing/webapp/tool"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
+
+func getAllFilesByAnswer(answer entity.Answer) entity.Answer {
+	var answerFiles []entity.AnswerFile
+	if err := model.GetAllAnswerFilesByAnswerID(&answerFiles, answer.ID); err != nil{
+		fmt.Println(err)
+	}
+	for _, af := range answerFiles {
+		var file entity.File
+		if err := model.GetFileByID(&file, af.ID);err != nil{
+			fmt.Println(err)
+		}
+		answer.Attachments = append(answer.Attachments, file)
+	}
+
+	return answer
+}
 
 //GetAnswers ... Get all Answers
 func GetAnswers(c *gin.Context) {
@@ -16,9 +34,12 @@ func GetAnswers(c *gin.Context) {
 			"error": err.Error(),
 		})
 		return
+	}else{
+		for _, a := range answers {
+			a = getAllFilesByAnswer(a)
+		}
+		c.JSON(http.StatusOK, answers)
 	}
-
-	c.JSON(http.StatusOK, answers)
 }
 
 //CreateAnswer ... Create Answer
@@ -57,8 +78,6 @@ func CreateAnswer(c *gin.Context, userID string) {
 	} else {
 		c.JSON(http.StatusCreated, answer)
 	}
-
-
 }
 
 //GetAnswerByID ... Get the answer by id
@@ -87,6 +106,8 @@ func GetAnswerByID(c *gin.Context) {
 		})
 		return
 	}
+
+	answer = getAllFilesByAnswer(answer)
 
 	c.JSON(http.StatusOK, answer)
 }
@@ -148,6 +169,7 @@ func UpdateAnswer(c *gin.Context, userID string) {
 		})
 		return
 	} else {
+		currAnswer = getAllFilesByAnswer(currAnswer)
 		c.JSON(http.StatusOK, currAnswer)
 	}
 }
@@ -184,6 +206,30 @@ func DeleteAnswer(c *gin.Context, userID string) {
 			"error": "The answer id and question id don't match!!!",
 		})
 		return
+	}
+
+	answer = getAllFilesByAnswer(answer)
+	if len(answer.Attachments) != 0 {
+		for _,a := range answer.Attachments{
+			var answerFile entity.AnswerFile
+			if err := model.DeleteAnswerFileByID(&answerFile,a.ID,answerID);err != nil{
+				c.JSON(http.StatusNotFound, gin.H{
+					"info": "can't delete the answer file",
+					"err": err.Error(),
+				})
+				return
+			}
+			tool.DeleteFile(tool.GetBucketName(), a.S3ObjectName)
+			if err := model.DeleteFile(&a,a.ID);err != nil {
+				c.JSON(http.StatusNotFound, gin.H{
+					"info": "can't delete the file",
+					"err": err.Error(),
+				})
+				return
+			}
+		}
+
+		answer.Attachments = nil
 	}
 
 	err := model.DeleteAnswer(&answer, answerID)

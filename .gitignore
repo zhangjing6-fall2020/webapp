@@ -18,3 +18,8 @@ mysql
 
 *.idea
 webapp
+
+# aws configure
+.env
+
+.DS_Store

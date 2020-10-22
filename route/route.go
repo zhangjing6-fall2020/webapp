@@ -67,5 +67,25 @@ func SetupRouter() *gin.Engine {
 		controller.DeleteAnswer(c, auth.GetCurrentUserID())
 	})
 
+	//upload a file to a question
+	authorized.POST("question/:question_id/file", func(c *gin.Context) {
+		controller.CreateQuestionFileAuth(c, auth.GetCurrentUserID())
+	})
+
+	//delete a file to a question
+	authorized.DELETE("question/:question_id/file/:file_id", func(c *gin.Context) {
+		controller.DeleteQuestionFileAuth(c, auth.GetCurrentUserID())
+	})
+
+	//upload a file to an answer
+	authorized.POST("question/:question_id/answer/:answer_id/file", func(c *gin.Context) {
+		controller.CreateAnswerFileAuth(c, auth.GetCurrentUserID())
+	})
+
+	//delete a file to an answer
+	authorized.DELETE("question/:question_id/answer/:answer_id/file/:file_id", func(c *gin.Context) {
+		controller.DeleteAnswerFileAuth(c, auth.GetCurrentUserID())
+	})
+
 	return r
 }
