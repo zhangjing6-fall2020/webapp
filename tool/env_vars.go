@@ -11,8 +11,7 @@ func GetBucketName() string {
 	return os.Getenv("BUCKET_NAME")
 }
 
-/*
-//local
+/*local
 func GetBucketName() string {
 	return "webapp.jing.zhang"
 }*/
