@@ -126,7 +126,7 @@ func UpdateAnswer(c *gin.Context, userID string) {
 	}
 
 	if currAnswer.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "only the user who post the answer can delete the answer!",
 		})
 		return
@@ -195,7 +195,7 @@ func DeleteAnswer(c *gin.Context, userID string) {
 	}
 
 	if answer.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "only the user who post the answer can delete the answer!",
 		})
 		return
