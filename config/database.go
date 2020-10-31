@@ -16,8 +16,7 @@ type DBConfig struct {
 	Password string
 }
 
-/*
-//local
+/*local
 func BuildDBConfig() *DBConfig {
 	dbConfig := DBConfig{
 		Host:     "localhost",
