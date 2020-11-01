@@ -1,0 +1,20 @@
+version: 0.0
+os: linux
+
+files:
+  - source: webapp
+    destination: /var/lib/webapps
+
+hooks:
+  AfterInstall:
+   - location: ./codedeploy/AfterInstall
+     timeout: 180
+     runas: ubuntu
+  ApplicationStart:
+   - location: ./codedeploy/ApplicationStart
+     timeout: 180
+     runas: ubuntu
+  BeforeInstall:
+   - location: ./codedeploy/BeforeInstall
+     timeout: 180
+     runas: ubuntu
