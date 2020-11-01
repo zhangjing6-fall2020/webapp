@@ -33,7 +33,7 @@ jobs:
           echo "${{ env.ARTIFACT_NAME }}"
           pwd
           ls
-          go build -v .
+          env GOOS=linux GOARCH=amd64 go build -v .
           pwd
           ls -al
 
@@ -66,6 +66,7 @@ jobs:
 
       - name: CodeDeploy API call
         run: |
+          aws deploy list-applications --region ${{ env.AWS_REGION }}
           output=$(aws deploy create-deployment \
             --application-name ${{ env.CODEDEPLOY_APPLICATION_NAME }} \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
