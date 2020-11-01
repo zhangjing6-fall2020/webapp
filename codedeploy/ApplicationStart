@@ -1,4 +1,3 @@
 #!/bin/bash
 
-#/var/lib/webapps/webapp &
-./webapp &
+/var/lib/webapps/webapp &
