@@ -25,7 +25,7 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 
 	//verify the userID
 	if question.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "the question is not created by the user!!!",
 		})
 		return
@@ -95,7 +95,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 
 	//verify the user
 	if question.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "the question is not created by the user!!!",
 		})
 		return
@@ -151,14 +151,14 @@ func CreateAnswerFileAuth(c *gin.Context, userID string) {
 
 	//verify the userID
 	if question.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "the question is not created by the user!!!",
 		})
 		return
 	}
 
 	if question.UserID != answer.UserID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "the question and the answer are not created by the same user!!!",
 		})
 		return
@@ -244,14 +244,14 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 
 	//verify the userID
 	if question.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "the question is not created by the user!!!",
 		})
 		return
 	}
 
 	if question.UserID != answer.UserID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "the question and the answer are not created by the same user!!!",
 		})
 		return

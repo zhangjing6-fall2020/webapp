@@ -247,7 +247,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		return
 	}
 	if currQuestion.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "only the user who posted the question can update the question!",
 		})
 		return
@@ -383,7 +383,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		return
 	}
 	if question.UserID != userID {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "only the user who posted the question can delete the question!",
 		})
 		return
