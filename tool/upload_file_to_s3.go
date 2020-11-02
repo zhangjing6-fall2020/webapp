@@ -95,7 +95,7 @@ func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName 
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		fmt.Printf("Unable to open file %q, %v", err)
+		fmt.Printf("Unable to open file %v", err)
 		return err
 	}
 	defer file.Close()
