@@ -219,7 +219,13 @@ func DeleteAnswer(c *gin.Context, userID string) {
 				})
 				return
 			}
-			tool.DeleteFile(tool.GetBucketName(), a.S3ObjectName)
+			if err := tool.DeleteFile(tool.GetBucketName(), a.S3ObjectName); err != nil {
+				c.JSON(http.StatusNotFound, gin.H{
+					"message": "can't delete the file from s3",
+					"err": err.Error(),
+				})
+				return
+			}
 			if err := model.DeleteFile(&a,a.ID);err != nil {
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file",

@@ -15,7 +15,7 @@ import (
 
 func exitErrorf(msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, msg+"\n", args...)
-	os.Exit(1)
+	//os.Exit(1)
 }
 
 var sess *session.Session
@@ -89,13 +89,14 @@ func listBucketItems(bucketName string)  {
 
 }
 
-func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName string)  {
+func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName string) error {
 	sess = initSession()
 	uploader := s3manager.NewUploader(sess)
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		exitErrorf("Unable to open file %q, %v", err)
+		fmt.Printf("Unable to open file %q, %v", err)
+		return err
 	}
 	defer file.Close()
 
@@ -108,10 +109,13 @@ func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName 
 	})
 	if err != nil {
 		// Print the error and exit.
-		exitErrorf("Unable to upload %q to %q, %v", objectName, bucketName, err)
+		//exitErrorf("Unable to upload %q to %q, %v", objectName, bucketName, err)
+		fmt.Printf("Unable to upload %q to %q, %v", objectName, bucketName, err)
+		return err
 	}
 
 	fmt.Printf("Successfully uploaded %q to %q\n", objectName, bucketName)
+	return nil
 }
 
 /*
@@ -234,10 +238,11 @@ func GetObjectMetaData(bucketName, objectName string) entity.Metadata{
 	}
 }
 
-func DeleteFile(bucketName, filename string)  {
+func DeleteFile(bucketName, filename string) error {
 	svc = initClient()
 	if _, err := svc.DeleteObject(&s3.DeleteObjectInput{Bucket: aws.String(bucketName), Key: aws.String(filename)}); err != nil {
-		exitErrorf("Unable to delete object %q from bucket %q, %v", filename, bucketName, err)
+		fmt.Printf("Unable to delete object %q from bucket %q, %v", filename, bucketName, err)
+		return err
 	}
 
 	err := svc.WaitUntilObjectNotExists(&s3.HeadObjectInput{
@@ -247,9 +252,10 @@ func DeleteFile(bucketName, filename string)  {
 
 	if err != nil {
 		// Print the error and exit.
-		exitErrorf("Unable to delete %q to %q, %v", filename, bucketName, err)
+		fmt.Printf("Unable to delete %q to %q, %v", filename, bucketName, err)
+		return err
 	}
 
 	fmt.Printf("Successfully deleted %q to %q\n", filename, bucketName)
-
+	return nil
 }
