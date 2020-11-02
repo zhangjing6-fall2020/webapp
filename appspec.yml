@@ -7,14 +7,14 @@ files:
 
 hooks:
   AfterInstall:
-   - location: ./codedeploy/AfterInstall
+   - location: ./codedeploy/AfterInstall.sh
      timeout: 180
      runas: ubuntu
   ApplicationStart:
-   - location: ./codedeploy/ApplicationStart
+   - location: ./codedeploy/ApplicationStart.sh
      timeout: 180
      runas: ubuntu
   BeforeInstall:
-   - location: ./codedeploy/BeforeInstall
+   - location: ./codedeploy/BeforeInstall.sh
      timeout: 180
      runas: ubuntu
