@@ -23,6 +23,10 @@ api spec:
 - [hw2](https://app.swaggerhub.com/apis-docs/csye6225/fall2020-csye6225/assignment-02)
 - [hw3](https://app.swaggerhub.com/apis-docs/csye6225/fall2020-csye6225/assignment-03)
 
+Useful link:
+- https://toolbox.googleapps.com/apps/dig/#A/
+- https://www.whatsmydns.net/#NS/bh7cw.me
+
 Changes from a2 to a3:
 - Added more APIs
 - Table `user` changes to `users`
@@ -46,3 +50,6 @@ Changes from a4 to a5:
 - add file, answer file, question file
 - post file: upload the file to S3 and database
 - delete file: delete the file from S3 and database
+
+Changes from a5 to a6:
+- use codedeploy to deploy webapp on ec2 instance
