@@ -45,7 +45,13 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 	file.ID = guuid.New().String()
 	file.FileName = fileHeader.Filename
 	file.S3ObjectName = fmt.Sprintf("%s/%s/%s", questionID, file.ID, file.FileName)
-	tool.UploadFile(bucketName, fileHeader, file.S3ObjectName)
+	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName);err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"info": "can't upload the file to s3",
+			"err": err.Error(),
+		})
+		return
+	}
 
 	//get S3 metadata
 	metadata := tool.GetObjectMetaData(bucketName, file.S3ObjectName)
@@ -111,7 +117,13 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 		return
 	}
 	//delete from s3
-	tool.DeleteFile(bucketName, file.S3ObjectName)
+	if err := tool.DeleteFile(bucketName, file.S3ObjectName); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"info": "can't delete the file from s3",
+			"err": err.Error(),
+		})
+		return
+	}
 
 	//delete question file
 	var questionFile entity.QuestionFile
@@ -185,7 +197,13 @@ func CreateAnswerFileAuth(c *gin.Context, userID string) {
 	file.ID = guuid.New().String()
 	file.FileName = fileHeader.Filename
 	file.S3ObjectName = fmt.Sprintf("%s/%s/%s", answerID, file.ID, file.FileName)
-	tool.UploadFile(bucketName, fileHeader, file.S3ObjectName)
+	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName);err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"info": "can't upload the file to s3",
+			"err": err.Error(),
+		})
+		return
+	}
 
 	//get S3 metadata
 	metadata := tool.GetObjectMetaData(bucketName, file.S3ObjectName)
@@ -283,7 +301,13 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 	}
 
 	//delete from s3
-	tool.DeleteFile(bucketName, file.S3ObjectName)
+	if err := tool.DeleteFile(bucketName, file.S3ObjectName); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"info": "can't delete the file from s3",
+			"err": err.Error(),
+		})
+		return
+	}
 
 	//delete answer file
 	var answerFile entity.AnswerFile
