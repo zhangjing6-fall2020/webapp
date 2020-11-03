@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source: webapp
-    destination: /opt
+    destination: /var/lib/webapps
 
 hooks:
   AfterInstall:
