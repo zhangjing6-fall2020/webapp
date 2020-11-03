@@ -1,7 +1,7 @@
 #!/bin/bash
 set -v
 
-killall webapp
+#killall webapp
 
 #file="/var/lib/webapps/webapp"
 
