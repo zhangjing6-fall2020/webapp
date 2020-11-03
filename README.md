@@ -32,6 +32,9 @@ Useful link:
 Debug codedeploy:
 - log: /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log
 
+Check port:
+- lsof -i:8080
+
 Changes from a2 to a3:
 - Added more APIs
 - Table `user` changes to `users`
