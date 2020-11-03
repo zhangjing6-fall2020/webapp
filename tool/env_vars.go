@@ -25,8 +25,8 @@ func GetDBPassword() string {
 }
 
 func GetHostname() string {
-	hostname := os.Getenv("HOSTNAME")
-	return strings.TrimRight(hostname,":3306")
+	hostname := os.Getenv("DBHOSTNAME")
+	return strings.TrimRight(hostname, ":3306")
 }
 
 func GetEnvVar(env string) string {
