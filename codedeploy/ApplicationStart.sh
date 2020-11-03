@@ -14,3 +14,4 @@ sleep 10
 ls /var/lib/webapps/webapp
 ls -l /var/lib/webapps
 jobs
+jobs -l
