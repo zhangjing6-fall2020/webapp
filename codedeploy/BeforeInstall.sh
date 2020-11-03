@@ -1,4 +1,10 @@
 #!/bin/bash
 set -v
 
-sudo rm -rf /var/lib/webapps/webapp
+killall webapp
+
+file="/var/lib/webapps/webapp"
+
+if [ -f "$file" ]; then
+  sudo rm -rf /var/lib/webapps/webapp
+fi
