@@ -1,5 +1,9 @@
 #!/bin/bash
 set -v
 
+whoami
+echo "HOSTNAME = "
+echo ${HOSTNAME}
+
 #/opt/webapp > /dev/null 2> /dev/null < /dev/null &
-/opt/webapp
+sudo /var/lib/webapps/webapp
