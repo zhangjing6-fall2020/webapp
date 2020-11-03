@@ -28,6 +28,9 @@ Useful link:
 - https://www.whatsmydns.net/#NS/bh7cw.me
 - https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-long-running-processes
 
+Debug codedeploy:
+- log: /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log
+
 Changes from a2 to a3:
 - Added more APIs
 - Table `user` changes to `users`
