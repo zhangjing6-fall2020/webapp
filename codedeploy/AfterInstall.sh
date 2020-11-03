@@ -1,4 +1,5 @@
 #!/bin/bash
 set -v
 
-sudo chown ubuntu:ubuntu /var/lib/webapps/webapp
+
+#sudo chown ubuntu:ubuntu /opt/webapp
