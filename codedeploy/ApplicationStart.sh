@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -v
 
-cd /opt
-./webapp > /dev/null 2> /dev/null < /dev/null &
+#/opt/webapp > /dev/null 2> /dev/null < /dev/null &
+/opt/webapp > /dev/null 2>&1 &
