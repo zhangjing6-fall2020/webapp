@@ -10,7 +10,7 @@ jobs
 ls /var/lib/webapps/webapp
 ls -l /var/lib/webapps
 
-sleep 60
-jobs
+sleep 10
 ls /var/lib/webapps/webapp
 ls -l /var/lib/webapps
+jobs
