@@ -26,6 +26,7 @@ api spec:
 Useful link:
 - https://toolbox.googleapps.com/apps/dig/#A/
 - https://www.whatsmydns.net/#NS/bh7cw.me
+- https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-long-running-processes
 
 Changes from a2 to a3:
 - Added more APIs
