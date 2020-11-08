@@ -9,11 +9,9 @@ import (
 
 //GetAllQuestionFiles Fetch all QuestionFile data
 func GetAllQuestionFiles(questionFiles *[]entity.QuestionFile) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
 	if err = config.DB.Find(&questionFiles).Error; err != nil {
 		return err
 	}
-	t.Send("get_all_question_files.query_time")
 	return nil
 }
 
@@ -29,21 +27,17 @@ func CreateQuestionFile(questionFile *entity.QuestionFile) (err error) {
 
 //GetQuestionFileByID ... Fetch only one QuestionFile by Id
 func GetQuestionFileByFileID(questionFile *entity.QuestionFile, fileID string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
 	if err = config.DB.Where("id = ?", fileID).First(&questionFile).Error; err != nil {
 		return err
 	}
-	t.Send("get_question_file_by_file_id.query_time")
 	return nil
 }
 
 //GetQuestionFileByQuestionID ... Fetch only one QuestionFile by QuestionId
 func GetQuestionFileByQuestionID(questionFile *entity.QuestionFile, questionID string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
 	if err = config.DB.Where("question_id = ?", questionID).First(&questionFile).Error; err != nil {
 		return err
 	}
-	t.Send("get_question_file_by_question_id.query_time")
 	return nil
 }
 

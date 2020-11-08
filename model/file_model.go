@@ -25,20 +25,18 @@ func CreateFileAuth(file *entity.File) (err error) {
 	if err = config.DB.Create(&file).Error; err != nil {
 		return err
 	}
-	t.Send("create_file_auth.query_time")
+	t.Send("create_file.query_time")
 	return nil
 }
 
 //CreateFile ... Insert New data
 func CreateFile(file *entity.File, questionOrAnswerID string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
 	file.ID = guuid.New().String()
 	file.CreatedDate = time.Now()
 	file.S3ObjectName = fmt.Sprintf("%s/%s/%s", questionOrAnswerID, file.ID, file.FileName)
 	if err = config.DB.Create(&file).Error; err != nil {
 		return err
 	}
-	t.Send("create_file.query_time")
 	return nil
 }
 
