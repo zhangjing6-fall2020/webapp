@@ -42,7 +42,6 @@ func initSession() *session.Session {
 
 		if err != nil {
 			log.Error("can't load the aws session")
-			log.Fatalf("can't load the aws session")
 		}else{
 			log.Trace("loaded s3 session")
 			sess = newSess

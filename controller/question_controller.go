@@ -334,7 +334,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		err := model.GetCategoryByName(&category, category.Category)
 		//if the category isn't found, it will return `record not found`
 		if err == nil {
-			log.Infof("the category: _%v_ already exists, didn't create duplicate category", category.Category)
+			log.Debugf("the category: _%v_ already exists, didn't create duplicate category", category.Category)
 			fmt.Println("the category: _" + category.Category + "_ already exists, didn't create duplicate category")
 		} else if err.Error() == "record not found" {
 			if err := model.CreateCategory(&category); err != nil {

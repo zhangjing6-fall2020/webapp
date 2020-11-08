@@ -18,8 +18,8 @@ func BcryptAndSalt(pwd string) string {
 func VerifyPasswd(hashPwd string, toVerfiyPwd string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashPwd), []byte(toVerfiyPwd))
 	if err != nil {
-		log.Errorf("verify passwd error: \n", err)
-		fmt.Printf("verify passwd error: \n", err)
+		log.Errorf("verify password error: %v\n", err)
+		fmt.Printf("verify password error: %v\n", err)
 		return false
 	}
 	return true
