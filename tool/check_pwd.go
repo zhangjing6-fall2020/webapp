@@ -2,6 +2,7 @@ package tool
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"regexp"
 )
 
@@ -15,10 +16,12 @@ const (
 
 func CheckPwd(minLength, maxLength, minLevel int, pwd string) error {
 	if len(pwd) < minLength {
-		return fmt.Errorf("Password is shorter than %d characters, set a longer password!", minLength)
+		log.Errorf("Password is shorter than %d characters, set a longer password", minLength)
+		return fmt.Errorf("Password is shorter than %d characters\n set a longer password\n", minLength)
 	}
 	if len(pwd) > maxLength {
-		return fmt.Errorf("Password is longer than %d characters, set a shorter password!", maxLength)
+		log.Errorf("Password is longer than %d characters, set a shorter password", maxLength)
+		return fmt.Errorf("Password is longer than %d characters\n set a shorter password\n", maxLength)
 	}
 
 	var level int = levelD
@@ -31,7 +34,9 @@ func CheckPwd(minLength, maxLength, minLevel int, pwd string) error {
 	}
 
 	if level < minLevel {
-		return fmt.Errorf("Password is too weak, set a complex one by using different characters!")
+		log.Errorf("Password is too weak, set a complex one by using different characters")
+		return fmt.Errorf("Password is too weak\n set a complex one by using different characters\n")
 	}
+	log.Tracef("Password level: %v", level)
 	return nil
 }

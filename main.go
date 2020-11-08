@@ -6,14 +6,18 @@ import (
 	"cloudcomputing/webapp/route"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	log "github.com/sirupsen/logrus"
 )
 
 var err error
 
 func main() {
+	log.Info("webapp starts...")
+
 	config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
 	if err != nil {
 		fmt.Println("Status:", err)
+		log.Errorf("failed to connect to database: %v", err)
 	}
 	defer config.DB.Close()
 
@@ -25,10 +29,14 @@ func main() {
 	config.DB.AutoMigrate(&entity.File{})//.AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT").AddForeignKey("answer_id", "categories(id)", "RESTRICT", "RESTRICT")
 	config.DB.AutoMigrate(&entity.AnswerFile{}).AddForeignKey("id", "files(id)", "RESTRICT", "RESTRICT").AddForeignKey("answer_id", "answers(id)", "RESTRICT", "RESTRICT")
 	config.DB.AutoMigrate(&entity.QuestionFile{}).AddForeignKey("id", "files(id)", "RESTRICT", "RESTRICT").AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT")
+	log.Info("created tables in database")
 
+	log.Info("waiting for request...")
 	r := route.SetupRouter()
 
 	//running
+	log.Info("webapp is running...")
 	r.Run()
+	log.Info("webapp ends...")
 }
 

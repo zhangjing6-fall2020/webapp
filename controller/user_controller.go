@@ -4,14 +4,17 @@ import (
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/model"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 //GetUsers ... Get all users
 func GetUsers(c *gin.Context) {
+	log.Trace("getting all users")
 	var users []entity.User
 	err := model.GetAllUsers(&users)
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -32,11 +35,13 @@ func GetUsers(c *gin.Context) {
 
 //CreateUser ... Create User
 func CreateUser(c *gin.Context) {
+	log.Trace("creating user")
 	var user entity.User
 	c.BindJSON(&user)
 
 	var checkUser entity.User
 	if err := model.GetUserByUsername(&checkUser, *user.Username); err == nil {
+		log.Error("the email has been registered")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "the email has been registered!",
 		})
@@ -45,6 +50,7 @@ func CreateUser(c *gin.Context) {
 
 	err := model.CreateUser(&user)
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -58,14 +64,17 @@ func CreateUser(c *gin.Context) {
 			"account_updated": user.AccountUpdated,
 		})
 	}
+	log.Trace("user created")
 }
 
 //GetUserByID ... Get the user by id
 func GetUserByID(c *gin.Context) {
+	log.Trace("getting user by id")
 	id := c.Params.ByName("id")
 	var user entity.User
 	err := model.GetUserByID(&user, id)
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -85,9 +94,11 @@ func GetUserByID(c *gin.Context) {
 //GetUserByUsername ... Get the user by username
 //Used in authorized get method endpoint: "/user/self"
 func GetUserByUsername(c *gin.Context, username string) {
+	log.Trace("getting user by username")
 	var user entity.User
 	err := model.GetUserByUsername(&user, username)
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -107,9 +118,11 @@ func GetUserByUsername(c *gin.Context, username string) {
 //UpdateAuthorizedUser ... update the user
 //Used in authorized put method endpoint: "/user/self"
 func UpdateAuthorizedUser(c *gin.Context,username string)  {
+	log.Trace("updating user")
 	var user entity.User
 	err := model.GetUserByUsername(&user, username)
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -123,6 +136,7 @@ func UpdateAuthorizedUser(c *gin.Context,username string)  {
 
 	//if the user wants to change id, username or create time, it's not allowed
 	if user.ID != oriID || *user.Username != oriUsername || user.AccountCreated != oriCreatedTime {
+		log.Error("id, username and AccountCreated are readonly")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "id, username and AccountCreated are readonly!!!",
 		})
@@ -131,6 +145,7 @@ func UpdateAuthorizedUser(c *gin.Context,username string)  {
 		//if the user isn't updating password, don't need to check the password
 		err = model.UpdateUserWithSamePwd(&user, user.ID)
 		if err != nil {
+			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -148,6 +163,7 @@ func UpdateAuthorizedUser(c *gin.Context,username string)  {
 		//if the user is updating password, do check the password
 		err = model.UpdateUserWithDiffPwd(&user, user.ID)
 		if err != nil {
+			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -162,6 +178,7 @@ func UpdateAuthorizedUser(c *gin.Context,username string)  {
 			})
 		}
 	}
+	log.Trace("user updated")
 }
 
 //UpdateUser ... Update the user information
@@ -225,11 +242,13 @@ func UpdateUserWithDiffPwd(c *gin.Context) {
 
 //DeleteUser ... Delete the user
 func DeleteUser(c *gin.Context) {
+	log.Trace("deleting user")
 	var user entity.User
 	id := c.Params.ByName("id")
 	err := model.DeleteUser(&user, id)
 
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -237,4 +256,5 @@ func DeleteUser(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"id" + id: "is deleted"})
 	}
+	log.Trace("user deleted")
 }

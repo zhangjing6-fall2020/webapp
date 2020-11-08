@@ -1,9 +1,9 @@
 package config
 
 import (
-	"cloudcomputing/webapp/tool"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	log "github.com/sirupsen/logrus"
 )
 
 var DB *gorm.DB
@@ -16,7 +16,7 @@ type DBConfig struct {
 	Password string
 }
 
-/*//local
+//local
 func BuildDBConfig() *DBConfig {
 	dbConfig := DBConfig{
 		Host:     "localhost",
@@ -26,10 +26,11 @@ func BuildDBConfig() *DBConfig {
 		DBName:   "user_story",
 	}
 	return &dbConfig
-}*/
-
+}
+/*
 //aws
 func BuildDBConfig() *DBConfig {
+	log.Debug("get the database config")
 	dbConfig := DBConfig{
 		Host:     tool.GetHostname(),//"localhost",
 		Port:     3306,
@@ -38,9 +39,10 @@ func BuildDBConfig() *DBConfig {
 		DBName:   tool.GetEnvVar("DB_NAME"),//"csye6225",//"user_story",
 	}
 	return &dbConfig
-}
+}*/
 
 func DbURL(dbConfig *DBConfig) string {
+	log.Debug("get the database config")
 	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 		dbConfig.User,

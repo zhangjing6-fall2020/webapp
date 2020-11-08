@@ -8,12 +8,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"mime/multipart"
 	"os"
 )
 
 func exitErrorf(msg string, args ...interface{}) {
+	log.Errorf(msg+"\n", args...)
 	fmt.Fprintf(os.Stderr, msg+"\n", args...)
 	//os.Exit(1)
 }
@@ -25,6 +26,7 @@ var svc *s3.S3
 //https://docs.aws.amazon.com/sdk-for-go/api/aws/session/
 func initSession() *session.Session {
 	if sess == nil {
+		log.Trace("initialize s3 session")
 		newSess, err := session.NewSessionWithOptions(session.Options{
 			// Specify profile to load for the session's config
 			Profile: "dev",
@@ -39,8 +41,10 @@ func initSession() *session.Session {
 		})
 
 		if err != nil {
+			log.Error("can't load the aws session")
 			log.Fatalf("can't load the aws session")
 		}else{
+			log.Trace("loaded s3 session")
 			sess = newSess
 		}
 	}
@@ -216,8 +220,10 @@ func GetObjectMetaData(bucketName, objectName string) entity.Metadata{
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case s3.ErrCodeNoSuchKey:
+				log.Errorf("s3 error no such key: %v", aerr.Error())
 				fmt.Println(s3.ErrCodeNoSuchKey, aerr.Error())
 			default:
+				log.Error(aerr.Error())
 				fmt.Println(aerr.Error())
 			}
 		} else {

@@ -8,7 +8,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/google/uuid v1.1.2
 	github.com/jinzhu/gorm v1.9.16
-	github.com/joho/godotenv v1.3.0
+	github.com/sirupsen/logrus v1.7.0
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
 	golang.org/x/net v0.0.0-20201016165138-7b1cca2348c0 // indirect
 )
