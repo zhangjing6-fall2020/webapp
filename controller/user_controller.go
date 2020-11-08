@@ -10,7 +10,7 @@ import (
 
 //GetUsers ... Get all users
 func GetUsers(c *gin.Context) {
-	log.Trace("getting all users")
+	log.Info("getting all users")
 	var users []entity.User
 	err := model.GetAllUsers(&users)
 	if err != nil {
@@ -35,7 +35,7 @@ func GetUsers(c *gin.Context) {
 
 //CreateUser ... Create User
 func CreateUser(c *gin.Context) {
-	log.Trace("creating user")
+	log.Info("creating user")
 	var user entity.User
 	c.BindJSON(&user)
 
@@ -64,12 +64,12 @@ func CreateUser(c *gin.Context) {
 			"account_updated": user.AccountUpdated,
 		})
 	}
-	log.Trace("user created")
+	log.Info("user created")
 }
 
 //GetUserByID ... Get the user by id
 func GetUserByID(c *gin.Context) {
-	log.Trace("getting user by id")
+	log.Info("getting user by id")
 	id := c.Params.ByName("id")
 	var user entity.User
 	err := model.GetUserByID(&user, id)
@@ -94,7 +94,7 @@ func GetUserByID(c *gin.Context) {
 //GetUserByUsername ... Get the user by username
 //Used in authorized get method endpoint: "/user/self"
 func GetUserByUsername(c *gin.Context, username string) {
-	log.Trace("getting user by username")
+	log.Info("getting user by username")
 	var user entity.User
 	err := model.GetUserByUsername(&user, username)
 	if err != nil {
@@ -118,7 +118,7 @@ func GetUserByUsername(c *gin.Context, username string) {
 //UpdateAuthorizedUser ... update the user
 //Used in authorized put method endpoint: "/user/self"
 func UpdateAuthorizedUser(c *gin.Context,username string)  {
-	log.Trace("updating user")
+	log.Info("updating user")
 	var user entity.User
 	err := model.GetUserByUsername(&user, username)
 	if err != nil {
@@ -178,7 +178,7 @@ func UpdateAuthorizedUser(c *gin.Context,username string)  {
 			})
 		}
 	}
-	log.Trace("user updated")
+	log.Info("user updated")
 }
 
 //UpdateUser ... Update the user information
@@ -242,7 +242,7 @@ func UpdateUserWithDiffPwd(c *gin.Context) {
 
 //DeleteUser ... Delete the user
 func DeleteUser(c *gin.Context) {
-	log.Trace("deleting user")
+	log.Info("deleting user")
 	var user entity.User
 	id := c.Params.ByName("id")
 	err := model.DeleteUser(&user, id)
@@ -256,5 +256,5 @@ func DeleteUser(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"id" + id: "is deleted"})
 	}
-	log.Trace("user deleted")
+	log.Info("user deleted")
 }
