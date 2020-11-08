@@ -6,6 +6,7 @@ import (
 	"cloudcomputing/webapp/tool"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 )
@@ -18,12 +19,14 @@ func getAllCategoriesByQuestion(question entity.Question) entity.Question {
 	//get all questionCategories by the questionId
 	var questionCategories []entity.QuestionCategory
 	if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, question.ID); err != nil {
+		log.Error(err)
 		fmt.Println(err)
 	}
 	//get all the categories by questionCategories, and add the categories to the question
 	for _, qc := range questionCategories {
 		var category entity.Category
 		if err := model.GetCategoryByID(&category, qc.CategoryID); err != nil {
+			log.Error(err)
 			fmt.Println(err)
 		}
 		question.Categories = append(question.Categories, category)
@@ -35,6 +38,7 @@ func getAllAnswersByQuestion(question entity.Question) entity.Question {
 	var answers []entity.Answer
 	err := model.GetAnswersByQuestionID(&answers, question.ID)
 	if err != nil {
+		log.Error(err)
 		fmt.Println(err)
 	}else{
 		for _, a := range answers {
@@ -49,11 +53,13 @@ func getAllAnswersByQuestion(question entity.Question) entity.Question {
 func getAllFilesByQuestion(question entity.Question) entity.Question {
 	var questionFiles []entity.QuestionFile
 	if err := model.GetAllQuestionFilesByQuestionID(&questionFiles, question.ID); err != nil{
+		log.Error(err)
 		fmt.Println(err)
 	}
 	for _, qf := range questionFiles {
 		var file entity.File
 		if err := model.GetFileByID(&file, qf.ID);err != nil{
+			log.Error(err)
 			fmt.Println(err)
 		}
 		question.Attachments = append(question.Attachments, file)
@@ -64,10 +70,12 @@ func getAllFilesByQuestion(question entity.Question) entity.Question {
 
 //GetQuestions ... Get all Questions
 func GetQuestions(c *gin.Context) {
+	log.Trace("getting all questions")
 	var questions []entity.Question
 	err := model.GetAllQuestions(&questions)
 
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -87,10 +95,12 @@ func GetQuestions(c *gin.Context) {
 
 //GetQuestionByID ... Get the Question by id
 func GetQuestionByID(c *gin.Context) {
+	log.Trace("getting question by id")
 	id := c.Params.ByName("question_id")
 	var question entity.Question
 	err := model.GetQuestionByID(&question, id)
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -111,6 +121,7 @@ func GetQuestionByID(c *gin.Context) {
 //create the question
 //create the questioncategory with the questionID and categoryID
 func CreateQuestionAuth(c *gin.Context, userID string) {
+	log.Trace("creating question")
 	var question entity.Question
 	c.BindJSON(&question)
 	if question.Categories != nil {
@@ -142,15 +153,18 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 		err := model.GetCategoryByName(&category, category.Category)
 		//if the category isn't found, it will return `record not found`
 		if err == nil {
+			log.Debugf("the category: _%v_ already exists", category.Category)
 			fmt.Println("the category: _" + category.Category + "_ already exists")
 		} else if err.Error() == "record not found" {
 			if err := model.CreateCategory(&category); err != nil {
+				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"error": err.Error(),
 				})
 				return
 			}
 		} else {
+			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -162,6 +176,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 	//create the question
 	err := model.CreateQuestion(&question)
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -189,6 +204,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 		"categories":        question.Categories,
 		"answers":           question.Answers,
 	})
+	log.Trace("question created")
 }
 
 //UpdateQuestion ... Update Question for authorized user
@@ -200,6 +216,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 //4.2 otherwise, remove the question's categories and all the questioncategories
 //add all the categories(if not exist), questioncategories, the question's categories
 func UpdateQuestionAuth(c *gin.Context, userID string) {
+	log.Trace("updating question")
 	var newQuestion entity.Question
 	c.BindJSON(&newQuestion)
 
@@ -226,6 +243,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 	//get the question id from context
 	questionID, match := c.Params.Get("question_id")
 	if !match {
+		log.Error("can't get the question id")
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": "can't get the question id",
 		})
@@ -247,6 +265,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		return
 	}
 	if currQuestion.UserID != userID {
+		log.Error("only the user who posted the question can update the question")
 		c.JSON(http.StatusForbidden, gin.H{
 			"error": "only the user who posted the question can update the question!",
 		})
@@ -261,6 +280,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 	if newQuestion.QuestionText != "" {
 		currQuestion.QuestionText = newQuestion.QuestionText
 		if err := model.UpdateQuestion(&currQuestion, newQuestion.ID); err != nil {
+			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -296,6 +316,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 	if currQuestion.Categories != nil {
 		var questionCategories []entity.QuestionCategory
 		if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, questionID); err != nil {
+			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -313,15 +334,18 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		err := model.GetCategoryByName(&category, category.Category)
 		//if the category isn't found, it will return `record not found`
 		if err == nil {
+			log.Debugf("the category: _%v_ already exists, didn't create duplicate category", category.Category)
 			fmt.Println("the category: _" + category.Category + "_ already exists, didn't create duplicate category")
 		} else if err.Error() == "record not found" {
 			if err := model.CreateCategory(&category); err != nil {
+				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"error": err.Error(),
 				})
 				return
 			}
 		} else {
+			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -337,6 +361,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 
 	//update the question
 	if err := model.UpdateQuestion(&currQuestion, newQuestion.ID); err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -352,6 +377,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		"categories":        currQuestion.Categories,
 		"answers":           currQuestion.Answers,
 	})
+	log.Trace("question updated")
 }
 
 //DeleteQuestion ... Delete the Question for authorized user
@@ -360,9 +386,11 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 //3. delete the questioncategory with the questionID
 //3. delete the question
 func DeleteQuestionAuth(c *gin.Context, userID string) {
+	log.Trace("deleting question")
 	//get the question id from context
 	questionID, match := c.Params.Get("question_id")
 	if !match {
+		log.Error("can't get the question id")
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": "can't get the question id",
 		})
@@ -371,6 +399,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 
 	var question entity.Question
 	if err := model.GetQuestionByID(&question, questionID); err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"question_id":       question.ID,
 			"created_timestamp": question.CreatedTimestamp,
@@ -383,6 +412,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		return
 	}
 	if question.UserID != userID {
+		log.Error("only the user who posted the question can delete the question")
 		c.JSON(http.StatusForbidden, gin.H{
 			"error": "only the user who posted the question can delete the question!",
 		})
@@ -391,6 +421,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 
 	question = getAllAnswersByQuestion(question)
 	if len(question.Answers) != 0 {
+		log.Error("the question with answers can't be deleted")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "the question with answers can't be deleted!",
 		})
@@ -400,6 +431,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 	var questionCategory entity.QuestionCategory
 	if err := model.GetQuestionCategoryByQuestionID(&questionCategory, questionID); err == nil {
 		if err := model.DeleteQuestionCategoryByQuestionId(&questionCategory, questionID); err != nil {
+			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"err": err.Error(),
 			})
@@ -414,6 +446,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		for _,q := range question.Attachments {
 			var questionFile entity.QuestionFile
 			if err := model.DeleteQuestionFileByID(&questionFile,q.ID,questionID);err != nil{
+				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the question file",
 					"err": err.Error(),
@@ -421,6 +454,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 				return
 			}
 			if err := tool.DeleteFile(tool.GetBucketName(), q.S3ObjectName); err != nil {
+				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file from s3",
 					"err": err.Error(),
@@ -428,6 +462,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 				return
 			}
 			if err := model.DeleteFile(&q,q.ID);err != nil {
+				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file",
 					"err": err.Error(),
@@ -439,10 +474,12 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 	}
 
 	if err := model.DeleteQuestion(&question, questionID); err != nil {
+		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": err.Error(),
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"id" + questionID: "is deleted"})
 	}
+	log.Trace("question deleted")
 }

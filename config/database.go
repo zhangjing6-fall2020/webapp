@@ -4,6 +4,7 @@ import (
 	"cloudcomputing/webapp/tool"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	log "github.com/sirupsen/logrus"
 )
 
 var DB *gorm.DB
@@ -30,6 +31,7 @@ func BuildDBConfig() *DBConfig {
 
 //aws
 func BuildDBConfig() *DBConfig {
+	log.Debug("get the database config")
 	dbConfig := DBConfig{
 		Host:     tool.GetHostname(),//"localhost",
 		Port:     3306,
@@ -41,6 +43,7 @@ func BuildDBConfig() *DBConfig {
 }
 
 func DbURL(dbConfig *DBConfig) string {
+	log.Debug("get the database config")
 	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 		dbConfig.User,
