@@ -1,8 +1,9 @@
 # webapp
-test5
-demo
 
 webapp running at port: 8080
+
+secrets setting:
+- prod or dev
 
 webapp design logic:
 - question with any answers cannot be deleted
