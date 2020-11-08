@@ -48,7 +48,7 @@ func GetAnswers(c *gin.Context) {
 
 //CreateAnswer ... Create Answer
 func CreateAnswer(c *gin.Context, userID string) {
-	log.Trace("creating answer")
+	log.Info("creating answer")
 	var answer entity.Answer
 	c.BindJSON(&answer)
 
@@ -85,14 +85,14 @@ func CreateAnswer(c *gin.Context, userID string) {
 			"error": err.Error(),
 		})
 	} else {
-		log.Trace("answer created")
+		log.Info("answer created")
 		c.JSON(http.StatusCreated, answer)
 	}
 }
 
 //GetAnswerByID ... Get the answer by id
 func GetAnswerByID(c *gin.Context) {
-	log.Trace("getting answer by id")
+	log.Info("getting answer by id")
 	answerID := c.Params.ByName("answer_id")
 	var answer entity.Answer
 	if err := model.GetAnswerByID(&answer, answerID); err != nil {
@@ -127,7 +127,7 @@ func GetAnswerByID(c *gin.Context) {
 }
 
 func UpdateAnswer(c *gin.Context, userID string) {
-	log.Trace("answer updating")
+	log.Info("answer updating")
 	var newAnswer entity.Answer
 	c.BindJSON(&newAnswer)
 
@@ -194,12 +194,12 @@ func UpdateAnswer(c *gin.Context, userID string) {
 		currAnswer = getAllFilesByAnswer(currAnswer)
 		c.JSON(http.StatusOK, currAnswer)
 	}
-	log.Trace("answer updated")
+	log.Info("answer updated")
 }
 
 //DeleteAnswer ... Delete the Answer
 func DeleteAnswer(c *gin.Context, userID string) {
-	log.Trace("answer deleting")
+	log.Info("answer deleting")
 	questionID := c.Params.ByName("question_id")
 	var question entity.Question
 	if err := model.GetQuestionByID(&question, questionID); err != nil {
@@ -281,5 +281,5 @@ func DeleteAnswer(c *gin.Context, userID string) {
 		c.JSON(http.StatusOK, gin.H{"id" + answerID: "is deleted"})
 	}
 
-	log.Trace("answer deleted")
+	log.Info("answer deleted")
 }

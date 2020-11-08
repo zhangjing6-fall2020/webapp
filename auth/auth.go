@@ -15,7 +15,7 @@ var currUsername string
 
 //verify the basic auth with username and password
 func BasicAuth() gin.HandlerFunc {
-	log.Trace("auth...")
+	log.Info("auth...")
 	return func(c *gin.Context) {
 		auth := strings.SplitN(c.Request.Header.Get("Authorization"), " ", 2)
 

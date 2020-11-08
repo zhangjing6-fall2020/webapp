@@ -70,7 +70,7 @@ func getAllFilesByQuestion(question entity.Question) entity.Question {
 
 //GetQuestions ... Get all Questions
 func GetQuestions(c *gin.Context) {
-	log.Trace("getting all questions")
+	log.Info("getting all questions")
 	var questions []entity.Question
 	err := model.GetAllQuestions(&questions)
 
@@ -95,7 +95,7 @@ func GetQuestions(c *gin.Context) {
 
 //GetQuestionByID ... Get the Question by id
 func GetQuestionByID(c *gin.Context) {
-	log.Trace("getting question by id")
+	log.Info("getting question by id")
 	id := c.Params.ByName("question_id")
 	var question entity.Question
 	err := model.GetQuestionByID(&question, id)
@@ -121,7 +121,7 @@ func GetQuestionByID(c *gin.Context) {
 //create the question
 //create the questioncategory with the questionID and categoryID
 func CreateQuestionAuth(c *gin.Context, userID string) {
-	log.Trace("creating question")
+	log.Info("creating question")
 	var question entity.Question
 	c.BindJSON(&question)
 	if question.Categories != nil {
@@ -204,7 +204,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 		"categories":        question.Categories,
 		"answers":           question.Answers,
 	})
-	log.Trace("question created")
+	log.Info("question created")
 }
 
 //UpdateQuestion ... Update Question for authorized user
@@ -216,7 +216,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 //4.2 otherwise, remove the question's categories and all the questioncategories
 //add all the categories(if not exist), questioncategories, the question's categories
 func UpdateQuestionAuth(c *gin.Context, userID string) {
-	log.Trace("updating question")
+	log.Info("updating question")
 	var newQuestion entity.Question
 	c.BindJSON(&newQuestion)
 
@@ -377,7 +377,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		"categories":        currQuestion.Categories,
 		"answers":           currQuestion.Answers,
 	})
-	log.Trace("question updated")
+	log.Info("question updated")
 }
 
 //DeleteQuestion ... Delete the Question for authorized user
@@ -386,7 +386,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 //3. delete the questioncategory with the questionID
 //3. delete the question
 func DeleteQuestionAuth(c *gin.Context, userID string) {
-	log.Trace("deleting question")
+	log.Info("deleting question")
 	//get the question id from context
 	questionID, match := c.Params.Get("question_id")
 	if !match {
@@ -481,5 +481,5 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"id" + questionID: "is deleted"})
 	}
-	log.Trace("question deleted")
+	log.Info("question deleted")
 }

@@ -14,7 +14,7 @@ import (
 var bucketName string = tool.GetBucketName()//"webapp.jing.zhang"
 
 func CreateQuestionFileAuth(c *gin.Context, userID string) {
-	log.Trace("creating question file")
+	log.Info("creating question file")
 	//get the current user
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
@@ -94,11 +94,11 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 	}
 
 	c.JSON(http.StatusOK, file)
-	log.Trace("question file created")
+	log.Info("question file created")
 }
 
 func DeleteQuestionFileAuth(c *gin.Context, userID string) {
-	log.Trace("question file deleting")
+	log.Info("question file deleting")
 	//get question
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
@@ -156,11 +156,11 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 		})
 		return
 	}
-	log.Trace("question file deleted")
+	log.Info("question file deleted")
 }
 
 func CreateAnswerFileAuth(c *gin.Context, userID string) {
-	log.Trace("answer file creating")
+	log.Info("answer file creating")
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
 	if err := model.GetQuestionByID(&question, questionID); err != nil {
@@ -265,11 +265,11 @@ func CreateAnswerFileAuth(c *gin.Context, userID string) {
 	}
 
 	c.JSON(http.StatusOK, file)
-	log.Trace("answer file deleted")
+	log.Info("answer file deleted")
 }
 
 func DeleteAnswerFileAuth(c *gin.Context, userID string) {
-	log.Trace("answer file deleting")
+	log.Info("answer file deleting")
 	//get question
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
@@ -362,5 +362,5 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 		})
 		return
 	}
-	log.Trace("question file deleted")
+	log.Info("question file deleted")
 }
