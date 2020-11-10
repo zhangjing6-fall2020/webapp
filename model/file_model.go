@@ -59,4 +59,3 @@ func DeleteFile(file *entity.File, id string) (err error) {
 	t.Send("delete_file.query_time")
 	return nil
 }
-

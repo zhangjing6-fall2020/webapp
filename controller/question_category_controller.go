@@ -94,7 +94,7 @@ func DeleteQuestionCategory(c *gin.Context) {
 	var questionCategory entity.QuestionCategory
 	questionID := c.Params.ByName("question_id")
 	categoryID := c.Params.ByName("category_id")
-	if err := model.GetQuestionCategoryByIDs(&questionCategory,questionID,categoryID); err!=nil{
+	if err := model.GetQuestionCategoryByIDs(&questionCategory, questionID, categoryID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})

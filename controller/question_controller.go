@@ -40,7 +40,7 @@ func getAllAnswersByQuestion(question entity.Question) entity.Question {
 	if err != nil {
 		log.Error(err)
 		fmt.Println(err)
-	}else{
+	} else {
 		for _, a := range answers {
 			a = getAllFilesByAnswer(a)
 			question.Answers = append(question.Answers, a)
@@ -52,13 +52,13 @@ func getAllAnswersByQuestion(question entity.Question) entity.Question {
 
 func getAllFilesByQuestion(question entity.Question) entity.Question {
 	var questionFiles []entity.QuestionFile
-	if err := model.GetAllQuestionFilesByQuestionID(&questionFiles, question.ID); err != nil{
+	if err := model.GetAllQuestionFilesByQuestionID(&questionFiles, question.ID); err != nil {
 		log.Error(err)
 		fmt.Println(err)
 	}
 	for _, qf := range questionFiles {
 		var file entity.File
-		if err := model.GetFileByID(&file, qf.ID);err != nil{
+		if err := model.GetFileByID(&file, qf.ID); err != nil {
 			log.Error(err)
 			fmt.Println(err)
 		}
@@ -443,13 +443,13 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 
 	question = getAllFilesByQuestion(question)
 	if len(question.Attachments) != 0 {
-		for _,q := range question.Attachments {
+		for _, q := range question.Attachments {
 			var questionFile entity.QuestionFile
-			if err := model.DeleteQuestionFileByID(&questionFile,q.ID,questionID);err != nil{
+			if err := model.DeleteQuestionFileByID(&questionFile, q.ID, questionID); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the question file",
-					"err": err.Error(),
+					"err":  err.Error(),
 				})
 				return
 			}
@@ -457,15 +457,15 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file from s3",
-					"err": err.Error(),
+					"err":  err.Error(),
 				})
 				return
 			}
-			if err := model.DeleteFile(&q,q.ID);err != nil {
+			if err := model.DeleteFile(&q, q.ID); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file",
-					"err": err.Error(),
+					"err":  err.Error(),
 				})
 				return
 			}

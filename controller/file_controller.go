@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-var bucketName string = tool.GetBucketName()//"webapp.jing.zhang"
+var bucketName string = tool.GetBucketName() //"webapp.jing.zhang"
 
 func CreateQuestionFileAuth(c *gin.Context, userID string) {
 	log.Info("creating question file")
@@ -50,11 +50,11 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 	file.ID = guuid.New().String()
 	file.FileName = fileHeader.Filename
 	file.S3ObjectName = fmt.Sprintf("%s/%s/%s", questionID, file.ID, file.FileName)
-	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName);err != nil {
+	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"info": "can't upload the file to s3",
-			"err": err.Error(),
+			"err":  err.Error(),
 		})
 		return
 	}
@@ -84,7 +84,7 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 	questionFile.File = file
 	questionFile.QuestionID = questionID
 	questionFile.Question = question
-	if err := model.CreateQuestionFile(&questionFile);err != nil {
+	if err := model.CreateQuestionFile(&questionFile); err != nil {
 		log.Error(err)
 		fmt.Println("can't create the question file!")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -134,7 +134,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"info": "can't delete the file from s3",
-			"err": err.Error(),
+			"err":  err.Error(),
 		})
 		return
 	}
@@ -149,7 +149,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 		return
 	}
 	//delete file
-	if err := model.DeleteFile(&file, fileID); err != nil{
+	if err := model.DeleteFile(&file, fileID); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -221,11 +221,11 @@ func CreateAnswerFileAuth(c *gin.Context, userID string) {
 	file.ID = guuid.New().String()
 	file.FileName = fileHeader.Filename
 	file.S3ObjectName = fmt.Sprintf("%s/%s/%s", answerID, file.ID, file.FileName)
-	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName);err != nil {
+	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"info": "can't upload the file to s3",
-			"err": err.Error(),
+			"err":  err.Error(),
 		})
 		return
 	}
@@ -255,7 +255,7 @@ func CreateAnswerFileAuth(c *gin.Context, userID string) {
 	answerFile.File = file
 	answerFile.AnswerID = answerID
 	answerFile.Answer = answer
-	if err := model.CreateAnswerFile(&answerFile);err != nil {
+	if err := model.CreateAnswerFile(&answerFile); err != nil {
 		log.Error(err)
 		fmt.Println("can't create the answer file!")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -340,7 +340,7 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"info": "can't delete the file from s3",
-			"err": err.Error(),
+			"err":  err.Error(),
 		})
 		return
 	}
@@ -355,7 +355,7 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 		return
 	}
 	//delete file
-	if err := model.DeleteFile(&file, fileID); err != nil{
+	if err := model.DeleteFile(&file, fileID); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),

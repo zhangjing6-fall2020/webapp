@@ -34,11 +34,11 @@ func BuildDBConfig() *DBConfig {
 func BuildDBConfig() *DBConfig {
 	log.Debug("get the database config")
 	dbConfig := DBConfig{
-		Host:     tool.GetHostname(),//"localhost",
+		Host:     tool.GetHostname(), //"localhost",
 		Port:     3306,
-		User:     tool.GetEnvVar("DB_USERNAME"),//"csye6225fall2020","root",
-		Password: tool.GetEnvVar("DB_PASSWORD"),//"MysqlPwd123",
-		DBName:   tool.GetEnvVar("DB_NAME"),//"csye6225",//"user_story",
+		User:     tool.GetEnvVar("DB_USERNAME"), //"csye6225fall2020","root",
+		Password: tool.GetEnvVar("DB_PASSWORD"), //"MysqlPwd123",
+		DBName:   tool.GetEnvVar("DB_NAME"),     //"csye6225",//"user_story",
 	}
 	return &dbConfig
 }

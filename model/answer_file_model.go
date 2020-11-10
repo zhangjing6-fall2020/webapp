@@ -64,4 +64,3 @@ func DeleteAnswerFileByID(answerFile *entity.AnswerFile, fileID string, answerID
 	t.Send("delete_answer_file_by_id.query_time")
 	return nil
 }
-
