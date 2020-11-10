@@ -2,16 +2,16 @@ package tool
 
 import (
 	"cloudcomputing/webapp/entity"
-	"cloudcomputing/webapp/monitor"
 	"fmt"
+	"mime/multipart"
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	log "github.com/sirupsen/logrus"
-	"mime/multipart"
-	"os"
 )
 
 func exitErrorf(msg string, args ...interface{}) {
@@ -43,7 +43,7 @@ func initSession() *session.Session {
 
 		if err != nil {
 			log.Error("can't load the aws session")
-		}else{
+		} else {
 			log.Trace("loaded s3 session")
 			sess = newSess
 		}
@@ -52,8 +52,8 @@ func initSession() *session.Session {
 	return sess
 }
 
-func initClient() *s3.S3{
-	if svc == nil{
+func initClient() *s3.S3 {
+	if svc == nil {
 		sess = initSession()
 		// Create S3 service client
 		svc = s3.New(sess)
@@ -62,7 +62,7 @@ func initClient() *s3.S3{
 	return svc
 }
 
-func listBuckets()  {
+func listBuckets() {
 	result, err := initClient().ListBuckets(nil)
 	if err != nil {
 		exitErrorf("Unable to list buckets, %v", err)
@@ -77,7 +77,7 @@ func listBuckets()  {
 
 }
 
-func listBucketItems(bucketName string)  {
+func listBucketItems(bucketName string) {
 	resp, err := initClient().ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
 	if err != nil {
 		exitErrorf("Unable to list items in bucket %q, %v", bucketName, err)
@@ -94,7 +94,7 @@ func listBucketItems(bucketName string)  {
 }
 
 func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName string) error {
-	t := monitor.SetUpStatsD().NewTiming()
+	//t := monitor.SetUpStatsD().NewTiming()
 	sess = initSession()
 	uploader := s3manager.NewUploader(sess)
 
@@ -109,8 +109,8 @@ func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName 
 
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucketName),
-		Key: aws.String(objectName),
-		Body: file,
+		Key:    aws.String(objectName),
+		Body:   file,
 	})
 	if err != nil {
 		// Print the error and exit.
@@ -120,7 +120,7 @@ func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName 
 	}
 
 	fmt.Printf("Successfully uploaded %q to %q\n", objectName, bucketName)
-	t.Send("upload_file.call_s3_service_time")
+	//t.Send("upload_file.call_s3_service_time")
 	return nil
 }
 
@@ -130,7 +130,7 @@ Output:
   Body: buffer(0xc000188f80)
 }
 */
-func GetTorrentMetaData(bucketName, objectName string){
+func GetTorrentMetaData(bucketName, objectName string) {
 	svc = initClient()
 	input := &s3.GetObjectTorrentInput{
 		Bucket: aws.String(bucketName),
@@ -171,8 +171,8 @@ Output:
     ID: "c9aa2e9801a08bff81f203f709ebe15f223510aceb094da962d18e4dee697738"
   }
 }
- */
-func GetAclMetaData(bucketName, objectName string){
+*/
+func GetAclMetaData(bucketName, objectName string) {
 	svc = initClient()
 	input := &s3.GetObjectAclInput{
 		Bucket: aws.String(bucketName),
@@ -210,8 +210,8 @@ Output:
   LastModified: 2020-10-18 14:08:25 +0000 UTC
 }
 */
-func GetObjectMetaData(bucketName, objectName string) entity.Metadata{
-	t := monitor.SetUpStatsD().NewTiming()
+func GetObjectMetaData(bucketName, objectName string) entity.Metadata {
+	//t := monitor.SetUpStatsD().NewTiming()
 	svc = initClient()
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
@@ -237,7 +237,7 @@ func GetObjectMetaData(bucketName, objectName string) entity.Metadata{
 	}
 
 	fmt.Println(result)
-	t.Send("get_object_metaData.call_s3_service_time")
+	//t.Send("get_object_metaData.call_s3_service_time")
 	return entity.Metadata{
 		AcceptRanges:  result.AcceptRanges,
 		ContentLength: result.ContentLength,
@@ -248,7 +248,7 @@ func GetObjectMetaData(bucketName, objectName string) entity.Metadata{
 }
 
 func DeleteFile(bucketName, filename string) error {
-	t := monitor.SetUpStatsD().NewTiming()
+	//t := monitor.SetUpStatsD().NewTiming()
 	svc = initClient()
 	if _, err := svc.DeleteObject(&s3.DeleteObjectInput{Bucket: aws.String(bucketName), Key: aws.String(filename)}); err != nil {
 		fmt.Printf("Unable to delete object %q from bucket %q, %v", filename, bucketName, err)
@@ -267,6 +267,6 @@ func DeleteFile(bucketName, filename string) error {
 	}
 
 	fmt.Printf("Successfully deleted %q to %q\n", filename, bucketName)
-	t.Send("delete_file.call_s3_service_time")
+	//t.Send("delete_file.call_s3_service_time")
 	return nil
 }

@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	//log "github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
 )
