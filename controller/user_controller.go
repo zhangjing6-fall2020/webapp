@@ -117,7 +117,7 @@ func GetUserByUsername(c *gin.Context, username string) {
 
 //UpdateAuthorizedUser ... update the user
 //Used in authorized put method endpoint: "/user/self"
-func UpdateAuthorizedUser(c *gin.Context,username string)  {
+func UpdateAuthorizedUser(c *gin.Context, username string) {
 	log.Info("updating user")
 	var user entity.User
 	err := model.GetUserByUsername(&user, username)

@@ -18,9 +18,6 @@ func main() {
 	//set up logrus
 	monitor.SetUpLog()
 
-	//set up statsD
-	monitor.SetUpStatsD()
-
 	config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
 	if err != nil {
 		fmt.Println("Status:", err)

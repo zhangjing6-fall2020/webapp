@@ -3,7 +3,6 @@ package model
 import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
-	"cloudcomputing/webapp/monitor"
 	"errors"
 	_ "github.com/go-sql-driver/mysql"
 	guuid "github.com/google/uuid"
@@ -12,7 +11,7 @@ import (
 
 //GetAllQuestions Fetch all question data
 func GetAllQuestions(questions *[]entity.Question) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Find(&questions).Error; err != nil {
 		return err
 	}
@@ -22,7 +21,7 @@ func GetAllQuestions(questions *[]entity.Question) (err error) {
 
 //CreateUser ... Insert New question
 func CreateQuestion(question *entity.Question) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	question.ID = guuid.New().String()
 	question.CreatedTimestamp = time.Now()
 	question.UpdatedTimestamp = time.Now()
@@ -35,7 +34,7 @@ func CreateQuestion(question *entity.Question) (err error) {
 
 //GetQuestionByID ... Fetch only one Question by Id
 func GetQuestionByID(question *entity.Question, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("id = ?", id).First(&question).Error; err != nil {
 		return err
 	}
@@ -45,7 +44,7 @@ func GetQuestionByID(question *entity.Question, id string) (err error) {
 
 //UpdateQuestion ... Update question
 func UpdateQuestion(question *entity.Question, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	question.UpdatedTimestamp = time.Now()
 	config.DB.Save(&question)
 	t.Send("update_question.query_time")
@@ -54,7 +53,7 @@ func UpdateQuestion(question *entity.Question, id string) (err error) {
 
 //DeleteUser ... Delete user
 func DeleteQuestion(question *entity.Question, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if config.DB.Where("id = ?", id).First(&question); question.ID == "" {
 		return errors.New("the question doesn't exist!!!")
 	}

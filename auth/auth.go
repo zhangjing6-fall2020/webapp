@@ -62,11 +62,11 @@ func respondWithError(code int, message string, c *gin.Context) {
 	c.Abort()
 }
 
-func GetCurrUsername()  string {
+func GetCurrUsername() string {
 	return currUsername
 }
 
-func GetCurrentUserID()  string {
+func GetCurrentUserID() string {
 	var user entity.User
 	err := model.GetUserByUsername(&user, currUsername)
 	if err != nil {

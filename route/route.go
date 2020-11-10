@@ -4,6 +4,7 @@ import (
 	"cloudcomputing/webapp/auth"
 	"cloudcomputing/webapp/controller"
 	"cloudcomputing/webapp/monitor"
+
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -18,16 +19,14 @@ func SetupRouter() *gin.Engine {
 	//create a new user
 	pub.POST("user", func(c *gin.Context) {
 		statsDClient.Increment("webapp.post_user")
-		t := statsDClient.NewTiming()
+		defer statsDClient.NewTiming().Send("post_user.response_time")
 		controller.CreateUser(c)
-		t.Send("post_user.response_time")
 	})
 	//get all the users
 	pub.GET("users", func(c *gin.Context) {
 		statsDClient.Increment("webapp.get_users")
-		t := statsDClient.NewTiming()
+		defer statsDClient.NewTiming().Send("get_users.response_time")
 		controller.GetUsers(c)
-		t.Send("get_users.response_time")
 	})
 	//pub.GET("/user/:email_address", controller.GetUserByEmail)
 	//pub.GET("user/:id", controller.GetUserByID)

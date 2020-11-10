@@ -3,7 +3,6 @@ package model
 import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
-	"cloudcomputing/webapp/monitor"
 	"errors"
 )
 
@@ -17,7 +16,7 @@ func GetAllQuestionFiles(questionFiles *[]entity.QuestionFile) (err error) {
 
 //CreateQuestionFile ... Insert New data
 func CreateQuestionFile(questionFile *entity.QuestionFile) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Create(&questionFile).Error; err != nil {
 		return err
 	}
@@ -42,7 +41,7 @@ func GetQuestionFileByQuestionID(questionFile *entity.QuestionFile, questionID s
 }
 
 func GetAllQuestionFilesByQuestionID(questionFiles *[]entity.QuestionFile, questionID string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("question_id = ?", questionID).Find(&questionFiles).Error; err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func GetAllQuestionFilesByQuestionID(questionFiles *[]entity.QuestionFile, quest
 
 //DeleteQuestionFileByID ... Delete QuestionFile by ID
 func DeleteQuestionFileByID(questionFile *entity.QuestionFile, fileID string, questionID string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	config.DB.Where("id = ? AND question_id = ?", fileID, questionID).First(&questionFile)
 	if questionFile.ID == "" || questionFile.QuestionID == "" {
 		return errors.New("the QuestionFile doesn't exist!!!")

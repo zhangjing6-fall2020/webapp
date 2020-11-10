@@ -36,6 +36,7 @@ Debug codedeploy:
 
 Check port:
 - lsof -i:8080
+- sudo netstat -pna | grep 8080
 
 Changes from a2 to a3:
 - Added more APIs

@@ -3,7 +3,6 @@ package model
 import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
-	"cloudcomputing/webapp/monitor"
 	"cloudcomputing/webapp/tool"
 	"errors"
 	_ "github.com/go-sql-driver/mysql"
@@ -13,7 +12,7 @@ import (
 
 //GetAllUsers Fetch all user data
 func GetAllUsers(user *[]entity.User) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Find(&user).Error; err != nil {
 		return err
 	}
@@ -23,7 +22,7 @@ func GetAllUsers(user *[]entity.User) (err error) {
 
 //CreateUser ... Insert New data
 func CreateUser(user *entity.User) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	user.ID = guuid.New().String()
 	if !tool.CheckUsername(user.Username) {
 		return errors.New("create user error: username is not email address!")
@@ -44,7 +43,7 @@ func CreateUser(user *entity.User) (err error) {
 
 //GetUserByID ... Fetch only one user by Id
 func GetUserByID(user *entity.User, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("id = ?", id).First(&user).Error; err != nil {
 		return err
 	}
@@ -53,7 +52,7 @@ func GetUserByID(user *entity.User, id string) (err error) {
 }
 
 func GetUserByUsername(user *entity.User, username string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		return err
 	}
@@ -63,7 +62,7 @@ func GetUserByUsername(user *entity.User, username string) (err error) {
 
 //UpdateUser ... Update user
 func UpdateUserWithSamePwd(user *entity.User, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if !tool.CheckUsername(user.Username) {
 		return errors.New("update user error: username is not email address!")
 	}
@@ -75,7 +74,7 @@ func UpdateUserWithSamePwd(user *entity.User, id string) (err error) {
 }
 
 func UpdateUserWithDiffPwd(user *entity.User, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if !tool.CheckUsername(user.Username) {
 		return errors.New("update user error: username is not email address!")
 	}
@@ -92,7 +91,7 @@ func UpdateUserWithDiffPwd(user *entity.User, id string) (err error) {
 
 //DeleteUser ... Delete user
 func DeleteUser(user *entity.User, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if config.DB.Where("id = ?", id).First(&user); user.ID == "" {
 		return errors.New("the user doesn't exist!!!")
 	}
