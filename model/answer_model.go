@@ -3,7 +3,6 @@ package model
 import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
-	"cloudcomputing/webapp/monitor"
 	"errors"
 	_ "github.com/go-sql-driver/mysql"
 	guuid "github.com/google/uuid"
@@ -12,7 +11,7 @@ import (
 
 //GetAllAnswers Fetch all Answer data
 func GetAllAnswers(answers *[]entity.Answer) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Find(&answers).Error; err != nil {
 		return err
 	}
@@ -22,7 +21,7 @@ func GetAllAnswers(answers *[]entity.Answer) (err error) {
 
 //CreateAnswer ... Insert New Answer
 func CreateAnswer(answer *entity.Answer) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	answer.ID = guuid.New().String()
 	answer.CreatedTimestamp = time.Now()
 	answer.UpdatedTimestamp = time.Now()
@@ -35,7 +34,7 @@ func CreateAnswer(answer *entity.Answer) (err error) {
 
 //GetAnswerByID ... Fetch only one Answer by Id
 func GetAnswerByID(answer *entity.Answer, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("id = ?", id).First(&answer).Error; err != nil {
 		return err
 	}
@@ -44,7 +43,7 @@ func GetAnswerByID(answer *entity.Answer, id string) (err error) {
 }
 
 func GetAnswersByQuestionID(answers *[]entity.Answer, questionID string)  (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("question_id = ?", questionID).Find(&answers).Error; err != nil {
 		return err
 	}
@@ -54,7 +53,7 @@ func GetAnswersByQuestionID(answers *[]entity.Answer, questionID string)  (err e
 
 //UpdateAnswer ... Update Answer
 func UpdateAnswer(answer *entity.Answer, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	answer.UpdatedTimestamp = time.Now()
 	config.DB.Save(&answer)
 	t.Send("update_answer.query_time")
@@ -63,7 +62,7 @@ func UpdateAnswer(answer *entity.Answer, id string) (err error) {
 
 //DeleteAnswer ... Delete Answer
 func DeleteAnswer(answer *entity.Answer, id string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if config.DB.Where("id = ?", id).First(&answer); answer.ID == "" {
 		return errors.New("the answer doesn't exist!!!")
 	}

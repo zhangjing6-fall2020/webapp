@@ -5,7 +5,10 @@ import (
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/monitor"
 	"errors"
+	"gopkg.in/alexcesaro/statsd.v2"
 )
+
+var statsDClient *statsd.Client = monitor.SetUpStatsD()
 
 //GetAllAnswerFiles Fetch all AnswerFile data
 func GetAllAnswerFiles(answerFile *[]entity.AnswerFile) (err error) {
@@ -17,7 +20,7 @@ func GetAllAnswerFiles(answerFile *[]entity.AnswerFile) (err error) {
 
 //CreateAnswerFile ... Insert New data
 func CreateAnswerFile(answerFile *entity.AnswerFile) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Create(&answerFile).Error; err != nil {
 		return err
 	}
@@ -42,7 +45,7 @@ func GetAnswerFileByAnswerID(answerFile *entity.AnswerFile, answerID string) (er
 }
 
 func GetAllAnswerFilesByAnswerID(answerFiles *[]entity.AnswerFile, answerID string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("answer_id = ?", answerID).Find(&answerFiles).Error; err != nil {
 		return err
 	}
@@ -52,7 +55,7 @@ func GetAllAnswerFilesByAnswerID(answerFiles *[]entity.AnswerFile, answerID stri
 
 //DeleteAnswerFileByID ... Delete AnswerFile by ID
 func DeleteAnswerFileByID(answerFile *entity.AnswerFile, fileID string, answerID string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	config.DB.Where("id = ? AND answer_id = ?", fileID, answerID).First(&answerFile)
 	if answerFile.ID == "" || answerFile.AnswerID == "" {
 		return errors.New("the AnswerFile doesn't exist!!!")

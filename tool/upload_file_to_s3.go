@@ -2,7 +2,9 @@ package tool
 
 import (
 	"cloudcomputing/webapp/entity"
+	"cloudcomputing/webapp/monitor"
 	"fmt"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"mime/multipart"
 	"os"
 
@@ -22,6 +24,7 @@ func exitErrorf(msg string, args ...interface{}) {
 
 var sess *session.Session
 var svc *s3.S3
+var statsDClient *statsd.Client = monitor.SetUpStatsD()
 
 //Create a session using the setup Region and credentials
 //https://docs.aws.amazon.com/sdk-for-go/api/aws/session/
@@ -94,7 +97,7 @@ func listBucketItems(bucketName string) {
 }
 
 func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName string) error {
-	//t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	sess = initSession()
 	uploader := s3manager.NewUploader(sess)
 
@@ -120,7 +123,7 @@ func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName 
 	}
 
 	fmt.Printf("Successfully uploaded %q to %q\n", objectName, bucketName)
-	//t.Send("upload_file.call_s3_service_time")
+	t.Send("upload_file.call_s3_service_time")
 	return nil
 }
 
@@ -211,7 +214,7 @@ Output:
 }
 */
 func GetObjectMetaData(bucketName, objectName string) entity.Metadata {
-	//t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	svc = initClient()
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
@@ -237,7 +240,7 @@ func GetObjectMetaData(bucketName, objectName string) entity.Metadata {
 	}
 
 	fmt.Println(result)
-	//t.Send("get_object_metaData.call_s3_service_time")
+	t.Send("get_object_metaData.call_s3_service_time")
 	return entity.Metadata{
 		AcceptRanges:  result.AcceptRanges,
 		ContentLength: result.ContentLength,
@@ -248,7 +251,7 @@ func GetObjectMetaData(bucketName, objectName string) entity.Metadata {
 }
 
 func DeleteFile(bucketName, filename string) error {
-	//t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	svc = initClient()
 	if _, err := svc.DeleteObject(&s3.DeleteObjectInput{Bucket: aws.String(bucketName), Key: aws.String(filename)}); err != nil {
 		fmt.Printf("Unable to delete object %q from bucket %q, %v", filename, bucketName, err)
@@ -267,6 +270,6 @@ func DeleteFile(bucketName, filename string) error {
 	}
 
 	fmt.Printf("Successfully deleted %q to %q\n", filename, bucketName)
-	//t.Send("delete_file.call_s3_service_time")
+	t.Send("delete_file.call_s3_service_time")
 	return nil
 }

@@ -3,13 +3,12 @@ package model
 import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
-	"cloudcomputing/webapp/monitor"
 	"errors"
 )
 
 //GetAllQuestionCategories Fetch all QuestionCategories data
 func GetAllQuestionCategories(questionCategories *[]entity.QuestionCategory) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Find(&questionCategories).Error; err != nil {
 		return err
 	}
@@ -19,7 +18,7 @@ func GetAllQuestionCategories(questionCategories *[]entity.QuestionCategory) (er
 
 //CreateQuestionCategory ... Insert New QuestionCategory
 func CreateQuestionCategory(questionCategory *entity.QuestionCategory) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Create(&questionCategory).Error; err != nil {
 		return err
 	}
@@ -29,7 +28,7 @@ func CreateQuestionCategory(questionCategory *entity.QuestionCategory) (err erro
 
 //GetAllQuestionCategoriesByQuestionID ... Fetch all the QuestionCategories by QuestionId
 func GetAllQuestionCategoriesByQuestionID(questionCategories *[]entity.QuestionCategory, questionId string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("question_id = ?", questionId).Find(&questionCategories).Error; err != nil {
 		return err
 	}
@@ -39,7 +38,7 @@ func GetAllQuestionCategoriesByQuestionID(questionCategories *[]entity.QuestionC
 
 //GetQuestionCategoryByQuestionID ... Fetch only one QuestionCategory by QuestionId
 func GetQuestionCategoryByQuestionID(questionCategory *entity.QuestionCategory, questionId string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("question_id = ?", questionId).First(&questionCategory).Error; err != nil {
 		return err
 	}
@@ -49,7 +48,7 @@ func GetQuestionCategoryByQuestionID(questionCategory *entity.QuestionCategory, 
 
 //GetQuestionCategoryByCategoryID ... Fetch only one QuestionCategory by CategoryId
 func GetQuestionCategoryByCategoryID(questionCategory *entity.QuestionCategory, categoryId string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("category_id = ?", categoryId).First(&questionCategory).Error; err != nil {
 		return err
 	}
@@ -59,7 +58,7 @@ func GetQuestionCategoryByCategoryID(questionCategory *entity.QuestionCategory, 
 
 //GetQuestionCategoryByIDs ... Fetch one QuestionCategory by CategoryId and QuestionId
 func GetQuestionCategoryByIDs(questionCategory *entity.QuestionCategory, questionId string, categoryId string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	if err = config.DB.Where("question_id = ? AND category_id = ?", questionId, categoryId).First(&questionCategory).Error; err != nil {
 		return err
 	}
@@ -69,7 +68,7 @@ func GetQuestionCategoryByIDs(questionCategory *entity.QuestionCategory, questio
 
 //UpdateQuestionCategory ... Update QuestionCategory
 func UpdateQuestionCategory(questionCategory *entity.QuestionCategory) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	config.DB.Save(&questionCategory)
 	t.Send("update_question_category.query_time")
 	return nil
@@ -77,7 +76,7 @@ func UpdateQuestionCategory(questionCategory *entity.QuestionCategory) (err erro
 
 //DeleteQuestionCategory ... Delete QuestionCategory
 func DeleteQuestionCategory(questionCategory *entity.QuestionCategory, questionId string, categoryId string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	config.DB.Where("question_id = ? AND category_id = ?", questionId, categoryId).First(&questionCategory)
 	if questionCategory.CategoryID == "" || questionCategory.QuestionID == "" {
 		return errors.New("the QuestionCategory doesn't exist!!!")
@@ -89,7 +88,7 @@ func DeleteQuestionCategory(questionCategory *entity.QuestionCategory, questionI
 
 //DeleteQuestionCategory ... Delete QuestionCategory
 func DeleteQuestionCategoryByQuestionId(questionCategory *entity.QuestionCategory, questionId string) (err error) {
-	t := monitor.SetUpStatsD().NewTiming()
+	t := statsDClient.NewTiming()
 	config.DB.Where("question_id = ?", questionId).First(&questionCategory)
 	if questionCategory.CategoryID == "" || questionCategory.QuestionID == "" {
 		return errors.New("the QuestionCategory doesn't exist!!!")

@@ -7,10 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/alexcesaro/statsd.v2"
 )
-
-var statsdClient *statsd.Client
 
 //SetupRouter ... Configure routes
 func SetupRouter() *gin.Engine {
@@ -178,9 +175,4 @@ func SetupRouter() *gin.Engine {
 	})
 
 	return r
-}
-
-
-func GetStatsdClient() *statsd.Client{
-	return statsdClient
 }
