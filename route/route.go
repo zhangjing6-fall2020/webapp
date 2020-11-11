@@ -22,11 +22,11 @@ func SetupRouter(client *statsd.Client) *gin.Engine {
 		controller.CreateUser(c)
 	})
 
-	client.Count("webapp.get_users", 10)
+	j := 0
 	//get all the users
 	pub.GET("users", func(c *gin.Context) {
-		//client.Count("webapp.get_users", 0)
-		client.Count("webapp.get_users", 0)
+		j++
+		client.Count("webapp.get_users", j)
 		t := client.NewTiming()
 		controller.GetUsers(c)
 		t.Send("get_users.response_time")
