@@ -1,5 +1,5 @@
 #!/bin/bash
 set -v
 
-killall webapp
+sudo killall webapp
 exit 0

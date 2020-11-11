@@ -9,7 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
 	"os"
-	"syscall"
 )
 
 var err error
@@ -24,9 +23,7 @@ func main() {
 		FullTimestamp: true,
 	})
 
-	mask := syscall.Umask(0)    // 改为 0000 八进制
-	defer syscall.Umask(mask)
-	filename := "webapp.log"
+	filename := "/var/log/webapp.log"
 	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		log.Error(err)
