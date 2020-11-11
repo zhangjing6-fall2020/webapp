@@ -3,6 +3,7 @@ module cloudcomputing/webapp
 go 1.13
 
 require (
+	github.com/amalfra/gin-statsd v0.0.1
 	github.com/aws/aws-sdk-go v1.35.9
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-sql-driver/mysql v1.5.0

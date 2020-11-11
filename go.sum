@@ -1,4 +1,6 @@
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
+github.com/amalfra/gin-statsd v0.0.1 h1:l2KyUzEq7XEHKcfzIwlzgi6JqAiBXhAMj8E7izKlqBQ=
+github.com/amalfra/gin-statsd v0.0.1/go.mod h1:cu1F9VuBnTE28OPF0PBQTmbeVFxlgBMVtoNomXp79Ps=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/aws/aws-sdk-go v1.35.9 h1:b1HiUpdkFLJyoOQ7zas36YHzjNHH0ivHx/G5lWBeg+U=
 github.com/aws/aws-sdk-go v1.35.9/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
