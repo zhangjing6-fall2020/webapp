@@ -38,6 +38,9 @@ Check port:
 - lsof -i:8080
 - sudo netstat -pna | grep 8080
 
+Test statsD:
+- `netcat -ulzp 8125`
+
 Changes from a2 to a3:
 - Added more APIs
 - Table `user` changes to `users`
