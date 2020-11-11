@@ -8,4 +8,5 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
     -s
 
 sleep 10
-sudo /var/lib/webapps/webapp > /dev/null 2> /dev/null < /dev/null &
+#sudo /var/lib/webapps/webapp > /dev/null 2> /dev/null < /dev/null &
+sudo /var/lib/webapps/webapp
