@@ -1,6 +1,0 @@
-time="2020-11-11T10:58:04-05:00" level=info msg="created tables in database"
-time="2020-11-11T10:58:04-05:00" level=info msg="waiting for request..."
-time="2020-11-11T10:58:04-05:00" level=info msg=auth...
-time="2020-11-11T10:58:04-05:00" level=info msg="webapp is running..."
-time="2020-11-11T10:58:11-05:00" level=info msg="getting all users"
-time="2020-11-11T10:58:12-05:00" level=info msg="getting all users"

@@ -40,6 +40,21 @@ Check port:
 
 Test statsD:
 - `netcat -ulzp 8125`
+- `echo "foo:1|c" | nc -u 127.0.0.1 8125`
+- `echo -n 'some.metric.namespace:1|c' | nc -u -q0 localhost 8125`
+- `while true; do curl http://localhost:8080/v1/users;sleep 1;done;`
+
+port:
+//https://blog.csdn.net/ws379374000/article/details/74218530
+- `sudo netstat -ntulp |grep 8125`
+
+Debug cloud watch:
+//https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance-fleet.html#start-CloudWatch-Agent-EC2-fleet
+- stop: `sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop`
+
+Debug code deploy:
+//https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-view-logs.html
+- `less /var/log/aws/codedeploy-agent/codedeploy-agent.log`
 
 Changes from a2 to a3:
 - Added more APIs
