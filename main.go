@@ -3,12 +3,12 @@ package main
 import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
-	"cloudcomputing/webapp/monitor"
 	"cloudcomputing/webapp/route"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
+	"os"
 )
 
 var err error
@@ -17,7 +17,20 @@ func main() {
 	log.Info("webapp starts...")
 
 	//set up logrus
-	monitor.SetUpLog()
+	//log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: true,
+		FullTimestamp: true,
+	})
+
+	filename := "webapp.log"
+	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
+	if err != nil {
+		log.Error(err)
+	}
+	log.SetOutput(f)
+
+	//log.SetLevel(log.WarnLevel)
 
 	//set up statsd
 	client, err := statsd.New() // Connect to the UDP port 8125 by default.
@@ -29,6 +42,7 @@ func main() {
 	}
 	defer client.Close()
 
+	//set up db
 	config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
 	if err != nil {
 		fmt.Println("Status:", err)
