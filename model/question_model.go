@@ -11,53 +11,53 @@ import (
 
 //GetAllQuestions Fetch all question data
 func GetAllQuestions(questions *[]entity.Question) (err error) {
-	t := statsDClient.NewTiming()
+	//t := statsDClient.NewTiming()
 	if err = config.DB.Find(&questions).Error; err != nil {
 		return err
 	}
-	t.Send("get_all_questions.query_time")
+	//t.Send("get_all_questions.query_time")
 	return nil
 }
 
 //CreateUser ... Insert New question
 func CreateQuestion(question *entity.Question) (err error) {
-	t := statsDClient.NewTiming()
+	//t := statsDClient.NewTiming()
 	question.ID = guuid.New().String()
 	question.CreatedTimestamp = time.Now()
 	question.UpdatedTimestamp = time.Now()
 	if err = config.DB.Create(&question).Error; err != nil {
 		return err
 	}
-	t.Send("create_question.query_time")
+	//t.Send("create_question.query_time")
 	return nil
 }
 
 //GetQuestionByID ... Fetch only one Question by Id
 func GetQuestionByID(question *entity.Question, id string) (err error) {
-	t := statsDClient.NewTiming()
+	//t := statsDClient.NewTiming()
 	if err = config.DB.Where("id = ?", id).First(&question).Error; err != nil {
 		return err
 	}
-	t.Send("get_question_by_id.query_time")
+	//t.Send("get_question_by_id.query_time")
 	return nil
 }
 
 //UpdateQuestion ... Update question
 func UpdateQuestion(question *entity.Question, id string) (err error) {
-	t := statsDClient.NewTiming()
+	//t := statsDClient.NewTiming()
 	question.UpdatedTimestamp = time.Now()
 	config.DB.Save(&question)
-	t.Send("update_question.query_time")
+	//t.Send("update_question.query_time")
 	return nil
 }
 
 //DeleteUser ... Delete user
 func DeleteQuestion(question *entity.Question, id string) (err error) {
-	t := statsDClient.NewTiming()
+	//t := statsDClient.NewTiming()
 	if config.DB.Where("id = ?", id).First(&question); question.ID == "" {
 		return errors.New("the question doesn't exist!!!")
 	}
 	config.DB.Where("id = ?", id).Delete(&question)
-	t.Send("delete_question.query_time")
+	//t.Send("delete_question.query_time")
 	return nil
 }
