@@ -8,13 +8,14 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"strings"
 )
 
 var currUsername string
 
 //verify the basic auth with username and password
-func BasicAuth() gin.HandlerFunc {
+func BasicAuth(client *statsd.Client) gin.HandlerFunc {
 	log.Info("auth...")
 	return func(c *gin.Context) {
 		auth := strings.SplitN(c.Request.Header.Get("Authorization"), " ", 2)
@@ -27,7 +28,7 @@ func BasicAuth() gin.HandlerFunc {
 		payload, _ := base64.StdEncoding.DecodeString(auth[1])
 		pair := strings.SplitN(string(payload), ":", 2)
 
-		if len(pair) != 2 || !authenticateUser(pair[0], pair[1]) {
+		if len(pair) != 2 || !authenticateUser(pair[0], pair[1], client) {
 			respondWithError(401, "Unauthorized", c)
 			log.Error("unauthorized user")
 			return
@@ -38,10 +39,10 @@ func BasicAuth() gin.HandlerFunc {
 }
 
 //check the username and password are the same as in the database to verify the user
-func authenticateUser(username, password string) bool {
+func authenticateUser(username, password string, client *statsd.Client) bool {
 	currUsername = username
 	var user entity.User
-	err := model.GetUserByUsername(&user, username)
+	err := model.GetUserByUsername(&user, username, client)
 	if err != nil {
 		fmt.Println("search user by email error: ", err)
 		log.Errorf("email doesn't exist: %v", err)
@@ -66,9 +67,9 @@ func GetCurrUsername() string {
 	return currUsername
 }
 
-func GetCurrentUserID() string {
+func GetCurrentUserID(client *statsd.Client) string {
 	var user entity.User
-	err := model.GetUserByUsername(&user, currUsername)
+	err := model.GetUserByUsername(&user, currUsername, client)
 	if err != nil {
 		log.Error("failed to get current user")
 		return err.Error()

@@ -4,6 +4,7 @@ import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
 	"errors"
+	"gopkg.in/alexcesaro/statsd.v2"
 )
 
 //var statsDClient *statsd.Client = monitor.SetUpStatsD()
@@ -17,12 +18,12 @@ func GetAllAnswerFiles(answerFile *[]entity.AnswerFile) (err error) {
 }
 
 //CreateAnswerFile ... Insert New data
-func CreateAnswerFile(answerFile *entity.AnswerFile) (err error) {
-	//t := statsDClient.NewTiming()
+func CreateAnswerFile(answerFile *entity.AnswerFile, client *statsd.Client) (err error) {
+	t := client.NewTiming()
 	if err = config.DB.Create(&answerFile).Error; err != nil {
 		return err
 	}
-	//t.Send("create_answer_file.query_time")
+	t.Send("create_answer_file.query_time")
 	return nil
 }
 
@@ -42,23 +43,23 @@ func GetAnswerFileByAnswerID(answerFile *entity.AnswerFile, answerID string) (er
 	return nil
 }
 
-func GetAllAnswerFilesByAnswerID(answerFiles *[]entity.AnswerFile, answerID string) (err error) {
-	//t := statsDClient.NewTiming()
+func GetAllAnswerFilesByAnswerID(answerFiles *[]entity.AnswerFile, answerID string, client *statsd.Client) (err error) {
+	t := client.NewTiming()
 	if err = config.DB.Where("answer_id = ?", answerID).Find(&answerFiles).Error; err != nil {
 		return err
 	}
-	//t.Send("get_all_answer_files_by_answer_id.query_time")
+	t.Send("get_all_answer_files_by_answer_id.query_time")
 	return nil
 }
 
 //DeleteAnswerFileByID ... Delete AnswerFile by ID
-func DeleteAnswerFileByID(answerFile *entity.AnswerFile, fileID string, answerID string) (err error) {
-	///t := statsDClient.NewTiming()
+func DeleteAnswerFileByID(answerFile *entity.AnswerFile, fileID string, answerID string, client *statsd.Client) (err error) {
+	t := client.NewTiming()
 	config.DB.Where("id = ? AND answer_id = ?", fileID, answerID).First(&answerFile)
 	if answerFile.ID == "" || answerFile.AnswerID == "" {
 		return errors.New("the AnswerFile doesn't exist!!!")
 	}
 	config.DB.Where("id = ? AND answer_id = ?", fileID, answerID).Delete(&answerFile)
-	//t.Send("delete_answer_file_by_id.query_time")
+	t.Send("delete_answer_file_by_id.query_time")
 	return nil
 }

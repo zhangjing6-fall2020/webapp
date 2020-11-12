@@ -7,18 +7,19 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"net/http"
 )
 
-func getAllFilesByAnswer(answer entity.Answer) entity.Answer {
+func getAllFilesByAnswer(answer entity.Answer, client *statsd.Client) entity.Answer {
 	var answerFiles []entity.AnswerFile
-	if err := model.GetAllAnswerFilesByAnswerID(&answerFiles, answer.ID); err != nil {
+	if err := model.GetAllAnswerFilesByAnswerID(&answerFiles, answer.ID, client); err != nil {
 		log.Error(err)
 		fmt.Println(err)
 	}
 	for _, af := range answerFiles {
 		var file entity.File
-		if err := model.GetFileByID(&file, af.ID); err != nil {
+		if err := model.GetFileByID(&file, af.ID, client); err != nil {
 			log.Error(err)
 			fmt.Println(err)
 		}
@@ -29,9 +30,9 @@ func getAllFilesByAnswer(answer entity.Answer) entity.Answer {
 }
 
 //GetAnswers ... Get all Answers
-func GetAnswers(c *gin.Context) {
+func GetAnswers(c *gin.Context, client *statsd.Client) {
 	var answers []entity.Answer
-	err := model.GetAllAnswers(&answers)
+	err := model.GetAllAnswers(&answers, client)
 	if err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
@@ -40,14 +41,14 @@ func GetAnswers(c *gin.Context) {
 		return
 	} else {
 		for _, a := range answers {
-			a = getAllFilesByAnswer(a)
+			a = getAllFilesByAnswer(a, client)
 		}
 		c.JSON(http.StatusOK, answers)
 	}
 }
 
 //CreateAnswer ... Create Answer
-func CreateAnswer(c *gin.Context, userID string) {
+func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("creating answer")
 	var answer entity.Answer
 	c.BindJSON(&answer)
@@ -62,7 +63,7 @@ func CreateAnswer(c *gin.Context, userID string) {
 	}
 
 	answer.QuestionID = questionID
-	if err := model.GetQuestionByID(&answer.Question, answer.QuestionID); err != nil {
+	if err := model.GetQuestionByID(&answer.Question, answer.QuestionID, client); err != nil {
 		log.Error("can't get the question by id")
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": "can't get the question id",
@@ -70,7 +71,7 @@ func CreateAnswer(c *gin.Context, userID string) {
 		return
 	}
 	answer.UserID = userID
-	if err := model.GetUserByID(&answer.User, userID); err != nil {
+	if err := model.GetUserByID(&answer.User, userID, client); err != nil {
 		log.Error("can't get the user by id")
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": "can't get the question id",
@@ -78,7 +79,7 @@ func CreateAnswer(c *gin.Context, userID string) {
 		return
 	}
 
-	err := model.CreateAnswer(&answer)
+	err := model.CreateAnswer(&answer, client)
 	if err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
@@ -91,11 +92,11 @@ func CreateAnswer(c *gin.Context, userID string) {
 }
 
 //GetAnswerByID ... Get the answer by id
-func GetAnswerByID(c *gin.Context) {
+func GetAnswerByID(c *gin.Context, client *statsd.Client) {
 	log.Info("getting answer by id")
 	answerID := c.Params.ByName("answer_id")
 	var answer entity.Answer
-	if err := model.GetAnswerByID(&answer, answerID); err != nil {
+	if err := model.GetAnswerByID(&answer, answerID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -113,7 +114,7 @@ func GetAnswerByID(c *gin.Context) {
 	}
 
 	var question entity.Question
-	if err := model.GetQuestionByID(&question, questionID); err != nil {
+	if err := model.GetQuestionByID(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -121,19 +122,19 @@ func GetAnswerByID(c *gin.Context) {
 		return
 	}
 
-	answer = getAllFilesByAnswer(answer)
+	answer = getAllFilesByAnswer(answer, client)
 
 	c.JSON(http.StatusOK, answer)
 }
 
-func UpdateAnswer(c *gin.Context, userID string) {
+func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("answer updating")
 	var newAnswer entity.Answer
 	c.BindJSON(&newAnswer)
 
 	answerID := c.Params.ByName("answer_id")
 	var currAnswer entity.Answer
-	if err := model.GetAnswerByID(&currAnswer, answerID); err != nil {
+	if err := model.GetAnswerByID(&currAnswer, answerID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -159,7 +160,7 @@ func UpdateAnswer(c *gin.Context, userID string) {
 	}
 
 	var question entity.Question
-	if err := model.GetQuestionByID(&question, questionID); err != nil {
+	if err := model.GetQuestionByID(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -168,7 +169,7 @@ func UpdateAnswer(c *gin.Context, userID string) {
 	}
 
 	currAnswer.UserID = userID
-	if err := model.GetUserByID(&currAnswer.User, userID); err != nil {
+	if err := model.GetUserByID(&currAnswer.User, userID, client); err != nil {
 		log.Error("can't get the question id")
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": "can't get the question id",
@@ -184,25 +185,25 @@ func UpdateAnswer(c *gin.Context, userID string) {
 		return
 	}
 	currAnswer.AnswerText = newAnswer.AnswerText
-	if err := model.UpdateAnswer(&currAnswer, answerID); err != nil {
+	if err := model.UpdateAnswer(&currAnswer, answerID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		return
 	} else {
-		currAnswer = getAllFilesByAnswer(currAnswer)
+		currAnswer = getAllFilesByAnswer(currAnswer, client)
 		c.JSON(http.StatusOK, currAnswer)
 	}
 	log.Info("answer updated")
 }
 
 //DeleteAnswer ... Delete the Answer
-func DeleteAnswer(c *gin.Context, userID string) {
+func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("answer deleting")
 	questionID := c.Params.ByName("question_id")
 	var question entity.Question
-	if err := model.GetQuestionByID(&question, questionID); err != nil {
+	if err := model.GetQuestionByID(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -212,7 +213,7 @@ func DeleteAnswer(c *gin.Context, userID string) {
 
 	answerID := c.Params.ByName("answer_id")
 	var answer entity.Answer
-	if err := model.GetAnswerByID(&answer, answerID); err != nil {
+	if err := model.GetAnswerByID(&answer, answerID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -236,11 +237,11 @@ func DeleteAnswer(c *gin.Context, userID string) {
 		return
 	}
 
-	answer = getAllFilesByAnswer(answer)
+	answer = getAllFilesByAnswer(answer, client)
 	if len(answer.Attachments) != 0 {
 		for _, a := range answer.Attachments {
 			var answerFile entity.AnswerFile
-			if err := model.DeleteAnswerFileByID(&answerFile, a.ID, answerID); err != nil {
+			if err := model.DeleteAnswerFileByID(&answerFile, a.ID, answerID, client); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the answer file",
@@ -248,7 +249,7 @@ func DeleteAnswer(c *gin.Context, userID string) {
 				})
 				return
 			}
-			if err := tool.DeleteFile(tool.GetBucketName(), a.S3ObjectName); err != nil {
+			if err := tool.DeleteFile(tool.GetBucketName(), a.S3ObjectName, client); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"message": "can't delete the file from s3",
@@ -256,7 +257,7 @@ func DeleteAnswer(c *gin.Context, userID string) {
 				})
 				return
 			}
-			if err := model.DeleteFile(&a, a.ID); err != nil {
+			if err := model.DeleteFile(&a, a.ID, client); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file",
@@ -269,7 +270,7 @@ func DeleteAnswer(c *gin.Context, userID string) {
 		answer.Attachments = nil
 	}
 
-	err := model.DeleteAnswer(&answer, answerID)
+	err := model.DeleteAnswer(&answer, answerID, client)
 
 	if err != nil {
 		log.Error(err)
