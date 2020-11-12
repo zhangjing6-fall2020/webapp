@@ -5,6 +5,7 @@ import (
 	"cloudcomputing/webapp/model"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"net/http"
 )
 
@@ -34,7 +35,7 @@ func GetUsers(c *gin.Context) {
 }
 
 //CreateUser ... Create User
-func CreateUser(c *gin.Context) {
+func CreateUser(c *gin.Context, client *statsd.Client) {
 	log.Info("creating user")
 	var user entity.User
 	c.BindJSON(&user)
@@ -48,7 +49,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	err := model.CreateUser(&user)
+	err := model.CreateUser(&user, client)
 	if err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{

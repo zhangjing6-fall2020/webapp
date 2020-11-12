@@ -8,12 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 	guuid "github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"net/http"
 )
 
 var bucketName string = tool.GetBucketName() //"webapp.jing.zhang"
 
-func CreateQuestionFileAuth(c *gin.Context, userID string) {
+func CreateQuestionFileAuth(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("creating question file")
 	//get the current user
 	var question entity.Question
@@ -50,7 +51,7 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 	file.ID = guuid.New().String()
 	file.FileName = fileHeader.Filename
 	file.S3ObjectName = fmt.Sprintf("%s/%s/%s", questionID, file.ID, file.FileName)
-	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName); err != nil {
+	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"info": "can't upload the file to s3",
@@ -60,7 +61,7 @@ func CreateQuestionFileAuth(c *gin.Context, userID string) {
 	}
 
 	//get S3 metadata
-	metadata := tool.GetObjectMetaData(bucketName, file.S3ObjectName)
+	metadata := tool.GetObjectMetaData(bucketName, file.S3ObjectName, client)
 	file.AcceptRanges = *metadata.AcceptRanges
 	file.ContentLength = *metadata.ContentLength
 	file.ContentType = *metadata.ContentType
@@ -159,7 +160,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 	log.Info("question file deleted")
 }
 
-func CreateAnswerFileAuth(c *gin.Context, userID string) {
+func CreateAnswerFileAuth(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("answer file creating")
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
@@ -221,7 +222,7 @@ func CreateAnswerFileAuth(c *gin.Context, userID string) {
 	file.ID = guuid.New().String()
 	file.FileName = fileHeader.Filename
 	file.S3ObjectName = fmt.Sprintf("%s/%s/%s", answerID, file.ID, file.FileName)
-	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName); err != nil {
+	if err := tool.UploadFile(bucketName, fileHeader, file.S3ObjectName, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"info": "can't upload the file to s3",
@@ -231,7 +232,7 @@ func CreateAnswerFileAuth(c *gin.Context, userID string) {
 	}
 
 	//get S3 metadata
-	metadata := tool.GetObjectMetaData(bucketName, file.S3ObjectName)
+	metadata := tool.GetObjectMetaData(bucketName, file.S3ObjectName, client)
 	file.AcceptRanges = *metadata.AcceptRanges
 	file.ContentLength = *metadata.ContentLength
 	file.ContentType = *metadata.ContentType

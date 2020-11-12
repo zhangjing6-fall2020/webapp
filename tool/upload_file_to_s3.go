@@ -3,6 +3,7 @@ package tool
 import (
 	"cloudcomputing/webapp/entity"
 	"fmt"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"mime/multipart"
 	"os"
 
@@ -22,6 +23,7 @@ func exitErrorf(msg string, args ...interface{}) {
 
 var sess *session.Session
 var svc *s3.S3
+
 //var statsDClient *statsd.Client = monitor.SetUpStatsD()
 
 //Create a session using the setup Region and credentials
@@ -94,8 +96,8 @@ func listBucketItems(bucketName string) {
 
 }
 
-func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName string) error {
-	//t := statsDClient.NewTiming()
+func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName string, client *statsd.Client) error {
+	t := client.NewTiming()
 	sess = initSession()
 	uploader := s3manager.NewUploader(sess)
 
@@ -121,7 +123,7 @@ func UploadFile(bucketName string, fileHeader *multipart.FileHeader, objectName 
 	}
 
 	fmt.Printf("Successfully uploaded %q to %q\n", objectName, bucketName)
-	//t.Send("upload_file.call_s3_service_time")
+	t.Send("upload_file.call_s3_service_time")
 	return nil
 }
 
@@ -211,8 +213,8 @@ Output:
   LastModified: 2020-10-18 14:08:25 +0000 UTC
 }
 */
-func GetObjectMetaData(bucketName, objectName string) entity.Metadata {
-	//t := statsDClient.NewTiming()
+func GetObjectMetaData(bucketName, objectName string, client *statsd.Client) entity.Metadata {
+	t := client.NewTiming()
 	svc = initClient()
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
@@ -238,7 +240,7 @@ func GetObjectMetaData(bucketName, objectName string) entity.Metadata {
 	}
 
 	fmt.Println(result)
-	//t.Send("get_object_metaData.call_s3_service_time")
+	t.Send("get_object_metaData.call_s3_service_time")
 	return entity.Metadata{
 		AcceptRanges:  result.AcceptRanges,
 		ContentLength: result.ContentLength,

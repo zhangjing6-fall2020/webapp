@@ -19,7 +19,7 @@ func SetupRouter(client *statsd.Client) *gin.Engine {
 		p0++
 		client.Count("webapp.post_user", p0)
 		defer client.NewTiming().Send("post_user.response_time")
-		controller.CreateUser(c)
+		controller.CreateUser(c, client)
 	})
 
 	j := 0
@@ -182,7 +182,7 @@ func SetupRouter(client *statsd.Client) *gin.Engine {
 		client.Count("webapp.post_question_file", a8)
 		log.Info("creating an file for a question with auth")
 		t := client.NewTiming()
-		controller.CreateQuestionFileAuth(c, auth.GetCurrentUserID())
+		controller.CreateQuestionFileAuth(c, auth.GetCurrentUserID(), client)
 		t.Send("post_question_file.response_time")
 	})
 
@@ -204,7 +204,7 @@ func SetupRouter(client *statsd.Client) *gin.Engine {
 		client.Count("webapp.post_answer_file", a10)
 		log.Info("creating an file for an answer with auth")
 		t := client.NewTiming()
-		controller.CreateAnswerFileAuth(c, auth.GetCurrentUserID())
+		controller.CreateAnswerFileAuth(c, auth.GetCurrentUserID(), client)
 		t.Send("post_answer_file.response_time")
 	})
 
