@@ -18,8 +18,8 @@ type DBConfig struct {
 	Password string
 }
 
-/*//local
-func BuildDBConfig() *DBConfig {
+//local
+/*func BuildDBConfig() *DBConfig {
 	dbConfig := DBConfig{
 		Host:     "localhost",
 		Port:     3306,
