@@ -7,5 +7,4 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
     -c file:/opt/cloudwatch-config.json \
     -s
 
-sleep 10
 sudo /var/lib/webapps/webapp > /dev/null 2> /dev/null < /dev/null &
