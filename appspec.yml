@@ -4,7 +4,7 @@ os: linux
 files:
   - source: webapp
     destination: /var/lib/webapps
-  - source: amazon-cloudwatch-agent-schema.json
+  - source: cloudwatch-config.json
     destination: /opt
 
 hooks:
