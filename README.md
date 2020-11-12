@@ -82,3 +82,7 @@ Changes from a4 to a5:
 
 Changes from a5 to a6:
 - use codedeploy to deploy webapp on ec2 instance
+
+Changes from a6 to a7:
+- add logs using logrus and metrics using statsD
+- send to watch cloud show the logs and metrics
