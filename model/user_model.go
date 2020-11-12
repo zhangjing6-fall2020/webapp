@@ -7,6 +7,7 @@ import (
 	"errors"
 	_ "github.com/go-sql-driver/mysql"
 	guuid "github.com/google/uuid"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"time"
 )
 
@@ -21,8 +22,8 @@ func GetAllUsers(user *[]entity.User) (err error) {
 }
 
 //CreateUser ... Insert New data
-func CreateUser(user *entity.User) (err error) {
-	//t := statsDClient.NewTiming()
+func CreateUser(user *entity.User, client *statsd.Client) (err error) {
+	t := client.NewTiming()
 	user.ID = guuid.New().String()
 	if !tool.CheckUsername(user.Username) {
 		return errors.New("create user error: username is not email address!")
@@ -37,7 +38,7 @@ func CreateUser(user *entity.User) (err error) {
 	if err = config.DB.Create(&user).Error; err != nil {
 		return err
 	}
-	//t.Send("create_user.query_time")
+	t.Send("create_user.query_time")
 	return nil
 }
 
@@ -52,7 +53,7 @@ func GetUserByID(user *entity.User, id string) (err error) {
 }
 
 func GetUserByUsername(user *entity.User, username string) (err error) {
-	//t := statsDClient.NewTiming()
+	//t := client.NewTiming()
 	if err = config.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		return err
 	}
