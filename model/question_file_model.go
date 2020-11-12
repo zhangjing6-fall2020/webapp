@@ -4,6 +4,7 @@ import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
 	"errors"
+	"gopkg.in/alexcesaro/statsd.v2"
 )
 
 //GetAllQuestionFiles Fetch all QuestionFile data
@@ -15,12 +16,12 @@ func GetAllQuestionFiles(questionFiles *[]entity.QuestionFile) (err error) {
 }
 
 //CreateQuestionFile ... Insert New data
-func CreateQuestionFile(questionFile *entity.QuestionFile) (err error) {
-	//t := statsDClient.NewTiming()
+func CreateQuestionFile(questionFile *entity.QuestionFile, client *statsd.Client) (err error) {
+	t := client.NewTiming()
 	if err = config.DB.Create(&questionFile).Error; err != nil {
 		return err
 	}
-	//t.Send("create_question_file.query_time")
+	t.Send("create_question_file.query_time")
 	return nil
 }
 
@@ -40,23 +41,23 @@ func GetQuestionFileByQuestionID(questionFile *entity.QuestionFile, questionID s
 	return nil
 }
 
-func GetAllQuestionFilesByQuestionID(questionFiles *[]entity.QuestionFile, questionID string) (err error) {
-	//t := statsDClient.NewTiming()
+func GetAllQuestionFilesByQuestionID(questionFiles *[]entity.QuestionFile, questionID string, client *statsd.Client) (err error) {
+	t := client.NewTiming()
 	if err = config.DB.Where("question_id = ?", questionID).Find(&questionFiles).Error; err != nil {
 		return err
 	}
-	//t.Send("get_all_question_files_by_question_id.query_time")
+	t.Send("get_all_question_files_by_question_id.query_time")
 	return nil
 }
 
 //DeleteQuestionFileByID ... Delete QuestionFile by ID
-func DeleteQuestionFileByID(questionFile *entity.QuestionFile, fileID string, questionID string) (err error) {
-	//t := statsDClient.NewTiming()
+func DeleteQuestionFileByID(questionFile *entity.QuestionFile, fileID string, questionID string, client *statsd.Client) (err error) {
+	t := client.NewTiming()
 	config.DB.Where("id = ? AND question_id = ?", fileID, questionID).First(&questionFile)
 	if questionFile.ID == "" || questionFile.QuestionID == "" {
 		return errors.New("the QuestionFile doesn't exist!!!")
 	}
 	config.DB.Where("id = ? AND question_id = ?", fileID, questionID).Delete(&questionFile)
-	//t.Send("delete_question_file_by_id.query_time")
+	t.Send("delete_question_file_by_id.query_time")
 	return nil
 }

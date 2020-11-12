@@ -19,7 +19,7 @@ func CreateQuestionFileAuth(c *gin.Context, userID string, client *statsd.Client
 	//get the current user
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
-	if err := model.GetQuestionByID(&question, questionID); err != nil {
+	if err := model.GetQuestionByID(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -70,7 +70,7 @@ func CreateQuestionFileAuth(c *gin.Context, userID string, client *statsd.Client
 
 	//create the file data
 	file.IsQuestion = true
-	if err := model.CreateFileAuth(&file); err != nil {
+	if err := model.CreateFileAuth(&file, client); err != nil {
 		log.Error(err)
 		fmt.Println("can't create the file!")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -85,7 +85,7 @@ func CreateQuestionFileAuth(c *gin.Context, userID string, client *statsd.Client
 	questionFile.File = file
 	questionFile.QuestionID = questionID
 	questionFile.Question = question
-	if err := model.CreateQuestionFile(&questionFile); err != nil {
+	if err := model.CreateQuestionFile(&questionFile, client); err != nil {
 		log.Error(err)
 		fmt.Println("can't create the question file!")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -98,12 +98,12 @@ func CreateQuestionFileAuth(c *gin.Context, userID string, client *statsd.Client
 	log.Info("question file created")
 }
 
-func DeleteQuestionFileAuth(c *gin.Context, userID string) {
+func DeleteQuestionFileAuth(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("question file deleting")
 	//get question
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
-	if err := model.GetQuestionByID(&question, questionID); err != nil {
+	if err := model.GetQuestionByID(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -123,7 +123,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 	//get file
 	fileID := c.Params.ByName("file_id")
 	var file entity.File
-	if err := model.GetFileByID(&file, fileID); err != nil {
+	if err := model.GetFileByID(&file, fileID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -131,7 +131,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 		return
 	}
 	//delete from s3
-	if err := tool.DeleteFile(bucketName, file.S3ObjectName); err != nil {
+	if err := tool.DeleteFile(bucketName, file.S3ObjectName, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"info": "can't delete the file from s3",
@@ -142,7 +142,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 
 	//delete question file
 	var questionFile entity.QuestionFile
-	if err := model.DeleteQuestionFileByID(&questionFile, fileID, questionID); err != nil {
+	if err := model.DeleteQuestionFileByID(&questionFile, fileID, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -150,7 +150,7 @@ func DeleteQuestionFileAuth(c *gin.Context, userID string) {
 		return
 	}
 	//delete file
-	if err := model.DeleteFile(&file, fileID); err != nil {
+	if err := model.DeleteFile(&file, fileID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -164,7 +164,7 @@ func CreateAnswerFileAuth(c *gin.Context, userID string, client *statsd.Client) 
 	log.Info("answer file creating")
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
-	if err := model.GetQuestionByID(&question, questionID); err != nil {
+	if err := model.GetQuestionByID(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -174,7 +174,7 @@ func CreateAnswerFileAuth(c *gin.Context, userID string, client *statsd.Client) 
 
 	var answer entity.Answer
 	answerID := c.Params.ByName("answer_id")
-	if err := model.GetAnswerByID(&answer, answerID); err != nil {
+	if err := model.GetAnswerByID(&answer, answerID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -241,7 +241,7 @@ func CreateAnswerFileAuth(c *gin.Context, userID string, client *statsd.Client) 
 
 	//create the file data
 	file.IsQuestion = false
-	if err := model.CreateFileAuth(&file); err != nil {
+	if err := model.CreateFileAuth(&file, client); err != nil {
 		log.Error(err)
 		fmt.Println("can't create the file!")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -256,7 +256,7 @@ func CreateAnswerFileAuth(c *gin.Context, userID string, client *statsd.Client) 
 	answerFile.File = file
 	answerFile.AnswerID = answerID
 	answerFile.Answer = answer
-	if err := model.CreateAnswerFile(&answerFile); err != nil {
+	if err := model.CreateAnswerFile(&answerFile, client); err != nil {
 		log.Error(err)
 		fmt.Println("can't create the answer file!")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -269,12 +269,12 @@ func CreateAnswerFileAuth(c *gin.Context, userID string, client *statsd.Client) 
 	log.Info("answer file deleted")
 }
 
-func DeleteAnswerFileAuth(c *gin.Context, userID string) {
+func DeleteAnswerFileAuth(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("answer file deleting")
 	//get question
 	var question entity.Question
 	questionID := c.Params.ByName("question_id")
-	if err := model.GetQuestionByID(&question, questionID); err != nil {
+	if err := model.GetQuestionByID(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -284,7 +284,7 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 
 	var answer entity.Answer
 	answerID := c.Params.ByName("answer_id")
-	if err := model.GetAnswerByID(&answer, answerID); err != nil {
+	if err := model.GetAnswerByID(&answer, answerID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -328,7 +328,7 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 	//get file
 	fileID := c.Params.ByName("file_id")
 	var file entity.File
-	if err := model.GetFileByID(&file, fileID); err != nil {
+	if err := model.GetFileByID(&file, fileID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -337,7 +337,7 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 	}
 
 	//delete from s3
-	if err := tool.DeleteFile(bucketName, file.S3ObjectName); err != nil {
+	if err := tool.DeleteFile(bucketName, file.S3ObjectName, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"info": "can't delete the file from s3",
@@ -348,7 +348,7 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 
 	//delete answer file
 	var answerFile entity.AnswerFile
-	if err := model.DeleteAnswerFileByID(&answerFile, fileID, answerID); err != nil {
+	if err := model.DeleteAnswerFileByID(&answerFile, fileID, answerID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -356,7 +356,7 @@ func DeleteAnswerFileAuth(c *gin.Context, userID string) {
 		return
 	}
 	//delete file
-	if err := model.DeleteFile(&file, fileID); err != nil {
+	if err := model.DeleteFile(&file, fileID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),

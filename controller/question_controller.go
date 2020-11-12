@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"net/http"
 	"strings"
 )
@@ -15,17 +16,17 @@ type void struct{}
 
 var member void
 
-func getAllCategoriesByQuestion(question entity.Question) entity.Question {
+func getAllCategoriesByQuestion(question entity.Question, client *statsd.Client) entity.Question {
 	//get all questionCategories by the questionId
 	var questionCategories []entity.QuestionCategory
-	if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, question.ID); err != nil {
+	if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, question.ID, client); err != nil {
 		log.Error(err)
 		fmt.Println(err)
 	}
 	//get all the categories by questionCategories, and add the categories to the question
 	for _, qc := range questionCategories {
 		var category entity.Category
-		if err := model.GetCategoryByID(&category, qc.CategoryID); err != nil {
+		if err := model.GetCategoryByID(&category, qc.CategoryID, client); err != nil {
 			log.Error(err)
 			fmt.Println(err)
 		}
@@ -34,15 +35,15 @@ func getAllCategoriesByQuestion(question entity.Question) entity.Question {
 	return question
 }
 
-func getAllAnswersByQuestion(question entity.Question) entity.Question {
+func getAllAnswersByQuestion(question entity.Question, client *statsd.Client) entity.Question {
 	var answers []entity.Answer
-	err := model.GetAnswersByQuestionID(&answers, question.ID)
+	err := model.GetAnswersByQuestionID(&answers, question.ID, client)
 	if err != nil {
 		log.Error(err)
 		fmt.Println(err)
 	} else {
 		for _, a := range answers {
-			a = getAllFilesByAnswer(a)
+			a = getAllFilesByAnswer(a, client)
 			question.Answers = append(question.Answers, a)
 		}
 	}
@@ -50,15 +51,15 @@ func getAllAnswersByQuestion(question entity.Question) entity.Question {
 	return question
 }
 
-func getAllFilesByQuestion(question entity.Question) entity.Question {
+func getAllFilesByQuestion(question entity.Question, client *statsd.Client) entity.Question {
 	var questionFiles []entity.QuestionFile
-	if err := model.GetAllQuestionFilesByQuestionID(&questionFiles, question.ID); err != nil {
+	if err := model.GetAllQuestionFilesByQuestionID(&questionFiles, question.ID, client); err != nil {
 		log.Error(err)
 		fmt.Println(err)
 	}
 	for _, qf := range questionFiles {
 		var file entity.File
-		if err := model.GetFileByID(&file, qf.ID); err != nil {
+		if err := model.GetFileByID(&file, qf.ID, client); err != nil {
 			log.Error(err)
 			fmt.Println(err)
 		}
@@ -69,10 +70,10 @@ func getAllFilesByQuestion(question entity.Question) entity.Question {
 }
 
 //GetQuestions ... Get all Questions
-func GetQuestions(c *gin.Context) {
+func GetQuestions(c *gin.Context, client *statsd.Client) {
 	log.Info("getting all questions")
 	var questions []entity.Question
-	err := model.GetAllQuestions(&questions)
+	err := model.GetAllQuestions(&questions, client)
 
 	if err != nil {
 		log.Error(err)
@@ -84,9 +85,9 @@ func GetQuestions(c *gin.Context) {
 
 	var questionsWithCategoriesAndAnswers []entity.Question
 	for _, q := range questions {
-		q = getAllCategoriesByQuestion(q)
-		q = getAllAnswersByQuestion(q)
-		q = getAllFilesByQuestion(q)
+		q = getAllCategoriesByQuestion(q, client)
+		q = getAllAnswersByQuestion(q, client)
+		q = getAllFilesByQuestion(q, client)
 		questionsWithCategoriesAndAnswers = append(questionsWithCategoriesAndAnswers, q)
 	}
 
@@ -94,11 +95,11 @@ func GetQuestions(c *gin.Context) {
 }
 
 //GetQuestionByID ... Get the Question by id
-func GetQuestionByID(c *gin.Context) {
+func GetQuestionByID(c *gin.Context, client *statsd.Client) {
 	log.Info("getting question by id")
 	id := c.Params.ByName("question_id")
 	var question entity.Question
-	err := model.GetQuestionByID(&question, id)
+	err := model.GetQuestionByID(&question, id, client)
 	if err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
@@ -107,9 +108,9 @@ func GetQuestionByID(c *gin.Context) {
 		return
 	}
 
-	question = getAllCategoriesByQuestion(question)
-	question = getAllAnswersByQuestion(question)
-	question = getAllFilesByQuestion(question)
+	question = getAllCategoriesByQuestion(question, client)
+	question = getAllAnswersByQuestion(question, client)
+	question = getAllFilesByQuestion(question, client)
 
 	c.JSON(http.StatusOK, question)
 }
@@ -120,7 +121,7 @@ func GetQuestionByID(c *gin.Context) {
 //set the question's categories
 //create the question
 //create the questioncategory with the questionID and categoryID
-func CreateQuestionAuth(c *gin.Context, userID string) {
+func CreateQuestionAuth(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("creating question")
 	var question entity.Question
 	c.BindJSON(&question)
@@ -132,7 +133,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 
 	//get the current user
 	question.UserID = userID
-	model.GetUserByID(&question.User, userID)
+	model.GetUserByID(&question.User, userID, client)
 
 	//add unique categories in the same question input to set
 	set := make(map[entity.Category]void)
@@ -150,13 +151,13 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 	//a. check exists in the category or not, if not create
 	//b. add to the question.Categories
 	for category := range set {
-		err := model.GetCategoryByName(&category, category.Category)
+		err := model.GetCategoryByName(&category, category.Category, client)
 		//if the category isn't found, it will return `record not found`
 		if err == nil {
 			log.Debugf("the category: _%v_ already exists", category.Category)
 			fmt.Println("the category: _" + category.Category + "_ already exists")
 		} else if err.Error() == "record not found" {
-			if err := model.CreateCategory(&category); err != nil {
+			if err := model.CreateCategory(&category, client); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"error": err.Error(),
@@ -174,7 +175,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 	}
 
 	//create the question
-	err := model.CreateQuestion(&question)
+	err := model.CreateQuestion(&question, client)
 	if err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
@@ -190,7 +191,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 		var questionCategory entity.QuestionCategory
 		questionCategory.QuestionID = question.ID
 		questionCategory.CategoryID = c.ID
-		model.CreateQuestionCategory(&questionCategory)
+		model.CreateQuestionCategory(&questionCategory, client)
 		//question.QuestionCategories = append(question.QuestionCategories, questionCategory)
 		//c.QuestionCategories = append(c.QuestionCategories, questionCategory)
 	}
@@ -215,7 +216,7 @@ func CreateQuestionAuth(c *gin.Context, userID string) {
 //4.1 if categories are the same, return: didn't implement
 //4.2 otherwise, remove the question's categories and all the questioncategories
 //add all the categories(if not exist), questioncategories, the question's categories
-func UpdateQuestionAuth(c *gin.Context, userID string) {
+func UpdateQuestionAuth(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("updating question")
 	var newQuestion entity.Question
 	c.BindJSON(&newQuestion)
@@ -252,7 +253,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 
 	var currQuestion entity.Question
 	//if the update question ID can't be found, return 404: Not Found
-	if err := model.GetQuestionByID(&currQuestion, questionID); err != nil {
+	if err := model.GetQuestionByID(&currQuestion, questionID, client); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"question_id":       newQuestion.ID,
 			"created_timestamp": newQuestion.CreatedTimestamp,
@@ -272,14 +273,14 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		return
 	}
 
-	currQuestion = getAllCategoriesByQuestion(currQuestion)
-	currQuestion = getAllAnswersByQuestion(currQuestion)
-	currQuestion = getAllFilesByQuestion(currQuestion)
+	currQuestion = getAllCategoriesByQuestion(currQuestion, client)
+	currQuestion = getAllAnswersByQuestion(currQuestion, client)
+	currQuestion = getAllFilesByQuestion(currQuestion, client)
 
 	//3. update question text if the questiontext input is not null
 	if newQuestion.QuestionText != "" {
 		currQuestion.QuestionText = newQuestion.QuestionText
-		if err := model.UpdateQuestion(&currQuestion, newQuestion.ID); err != nil {
+		if err := model.UpdateQuestion(&currQuestion, newQuestion.ID, client); err != nil {
 			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
@@ -315,7 +316,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 	//4.2 otherwise, remove the question's categories and all the questioncategories
 	if currQuestion.Categories != nil {
 		var questionCategories []entity.QuestionCategory
-		if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, questionID); err != nil {
+		if err := model.GetAllQuestionCategoriesByQuestionID(&questionCategories, questionID, client); err != nil {
 			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
@@ -324,20 +325,20 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		}
 		//get all the categories by questionCategories, and add the categories to the question
 		for _, qc := range questionCategories {
-			model.DeleteQuestionCategory(&qc, qc.QuestionID, qc.CategoryID)
+			model.DeleteQuestionCategory(&qc, qc.QuestionID, qc.CategoryID, client)
 		}
 		currQuestion.Categories = append([]entity.Category{})
 	}
 
 	//add all the categories(if not exist), questioncategories, the question's categories
 	for category := range set {
-		err := model.GetCategoryByName(&category, category.Category)
+		err := model.GetCategoryByName(&category, category.Category, client)
 		//if the category isn't found, it will return `record not found`
 		if err == nil {
 			log.Debugf("the category: _%v_ already exists, didn't create duplicate category", category.Category)
 			fmt.Println("the category: _" + category.Category + "_ already exists, didn't create duplicate category")
 		} else if err.Error() == "record not found" {
-			if err := model.CreateCategory(&category); err != nil {
+			if err := model.CreateCategory(&category, client); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"error": err.Error(),
@@ -356,11 +357,11 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 		var questionCategory entity.QuestionCategory
 		questionCategory.QuestionID = currQuestion.ID
 		questionCategory.CategoryID = category.ID
-		model.UpdateQuestionCategory(&questionCategory)
+		model.UpdateQuestionCategory(&questionCategory, client)
 	}
 
 	//update the question
-	if err := model.UpdateQuestion(&currQuestion, newQuestion.ID); err != nil {
+	if err := model.UpdateQuestion(&currQuestion, newQuestion.ID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -385,7 +386,7 @@ func UpdateQuestionAuth(c *gin.Context, userID string) {
 //2. if the question has any answers, can't delete the question
 //3. delete the questioncategory with the questionID
 //3. delete the question
-func DeleteQuestionAuth(c *gin.Context, userID string) {
+func DeleteQuestionAuth(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("deleting question")
 	//get the question id from context
 	questionID, match := c.Params.Get("question_id")
@@ -398,7 +399,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 	}
 
 	var question entity.Question
-	if err := model.GetQuestionByID(&question, questionID); err != nil {
+	if err := model.GetQuestionByID(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"question_id":       question.ID,
@@ -419,7 +420,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		return
 	}
 
-	question = getAllAnswersByQuestion(question)
+	question = getAllAnswersByQuestion(question, client)
 	if len(question.Answers) != 0 {
 		log.Error("the question with answers can't be deleted")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -429,8 +430,8 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 	}
 
 	var questionCategory entity.QuestionCategory
-	if err := model.GetQuestionCategoryByQuestionID(&questionCategory, questionID); err == nil {
-		if err := model.DeleteQuestionCategoryByQuestionId(&questionCategory, questionID); err != nil {
+	if err := model.GetQuestionCategoryByQuestionID(&questionCategory, questionID, client); err == nil {
+		if err := model.DeleteQuestionCategoryByQuestionId(&questionCategory, questionID, client); err != nil {
 			log.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
 				"err": err.Error(),
@@ -441,11 +442,11 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		fmt.Println("the question doesn't have any categories!")
 	}
 
-	question = getAllFilesByQuestion(question)
+	question = getAllFilesByQuestion(question, client)
 	if len(question.Attachments) != 0 {
 		for _, q := range question.Attachments {
 			var questionFile entity.QuestionFile
-			if err := model.DeleteQuestionFileByID(&questionFile, q.ID, questionID); err != nil {
+			if err := model.DeleteQuestionFileByID(&questionFile, q.ID, questionID, client); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the question file",
@@ -453,7 +454,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 				})
 				return
 			}
-			if err := tool.DeleteFile(tool.GetBucketName(), q.S3ObjectName); err != nil {
+			if err := tool.DeleteFile(tool.GetBucketName(), q.S3ObjectName, client); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file from s3",
@@ -461,7 +462,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 				})
 				return
 			}
-			if err := model.DeleteFile(&q, q.ID); err != nil {
+			if err := model.DeleteFile(&q, q.ID, client); err != nil {
 				log.Error(err)
 				c.JSON(http.StatusNotFound, gin.H{
 					"info": "can't delete the file",
@@ -473,7 +474,7 @@ func DeleteQuestionAuth(c *gin.Context, userID string) {
 		question.Attachments = nil
 	}
 
-	if err := model.DeleteQuestion(&question, questionID); err != nil {
+	if err := model.DeleteQuestion(&question, questionID, client); err != nil {
 		log.Error(err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": err.Error(),

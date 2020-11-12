@@ -250,8 +250,8 @@ func GetObjectMetaData(bucketName, objectName string, client *statsd.Client) ent
 	}
 }
 
-func DeleteFile(bucketName, filename string) error {
-	//t := statsDClient.NewTiming()
+func DeleteFile(bucketName, filename string, client *statsd.Client) error {
+	t := client.NewTiming()
 	svc = initClient()
 	if _, err := svc.DeleteObject(&s3.DeleteObjectInput{Bucket: aws.String(bucketName), Key: aws.String(filename)}); err != nil {
 		fmt.Printf("Unable to delete object %q from bucket %q, %v", filename, bucketName, err)
@@ -270,6 +270,6 @@ func DeleteFile(bucketName, filename string) error {
 	}
 
 	fmt.Printf("Successfully deleted %q to %q\n", filename, bucketName)
-	//t.Send("delete_file.call_s3_service_time")
+	t.Send("delete_file.call_s3_service_time")
 	return nil
 }
