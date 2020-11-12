@@ -23,14 +23,14 @@ func SetupRouter(client *statsd.Client) *gin.Engine {
 		client.Count("webapp.post_user", p0)
 	})
 
-	var j int64
+	//var j int64
 	//get all the users
 	pub.GET("users", func(c *gin.Context) {
-		t := client.NewTiming()
+		//t := client.NewTiming()
 		controller.GetUsers(c, client)
-		t.Send("get_users.response_time")
-		j++
-		client.Count("webapp.get_users", j)
+		//t.Send("get_users.response_time")
+		//j++
+		//client.Count("webapp.get_users", j)
 	})
 
 	//pub.GET("/user/:email_address", controller.GetUserByEmail)
