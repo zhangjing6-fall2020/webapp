@@ -20,6 +20,11 @@ Instructions:
     - Build for ubuntu: `env GOOS=linux GOARCH=amd64 go build`
     - Test: `go test ./...`
     - Run: `go run main.go`
+3. JMeter do load test.
+   - install [JMeter](https://jmeter.apache.org/)
+   - run JMeter: `jmeter`
+   - open the jmx file
+   - run the load test
 
 api spec:
 - [hw2](https://app.swaggerhub.com/apis-docs/csye6225/fall2020-csye6225/assignment-02)
@@ -85,3 +90,8 @@ Changes from a5 to a6:
 Changes from a6 to a7:
 - add logs using logrus and metrics using statsD
 - send to watch cloud show the logs and metrics
+
+Changes from a7 to a8:
+- add auto scaling instead of ec2
+- add load-balancer
+- add jmeter to do load test
