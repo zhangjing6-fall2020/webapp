@@ -100,7 +100,7 @@ func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answer.ID, answer.AnswerText)
 
-	message03 := fmt.Sprintf("link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answer.ID)
+	message03 := fmt.Sprintf("Link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answer.ID)
 
 	message := fmt.Sprintf("%v, %v, %v", message01, message02, message03)
 	result, err := tool.PublishMessageOnSNS(message)
@@ -222,13 +222,16 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	1.Question details such as ID, user's email address
 	2.Answer details such as ID, answer text, etc
 	3.HTTP link to the question & answer (created or updated):
-	http://prod.bh7cw.me:80/v1/question/{questionId}/answer/{answerId}*/
+	http://prod.bh7cw.me:80/v1/question/{questionId}/answer/{answerId}
+	message content:
+	QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v, AnswerID: %v, AnswerText: %v, link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v
+	*/
 	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
 		questionID, currAnswer.Question.QuestionText, currAnswer.User.FirstName, currAnswer.User.LastName, currAnswer.User.Username)
 
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answerID, currAnswer.AnswerText)
 
-	message03 := fmt.Sprintf("link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answerID)
+	message03 := fmt.Sprintf("Link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answerID)
 
 	message := fmt.Sprintf("%v, %v, %v", message01, message02, message03)
 	result, err := tool.PublishMessageOnSNS(message)
