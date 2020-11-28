@@ -102,7 +102,7 @@ func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 
 	message03 := fmt.Sprintf("Link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answer.ID)
 
-	message := fmt.Sprintf("%v, %v, %v", message01, message02, message03)
+	message := fmt.Sprintf("create answer, %v, %v, %v", message01, message02, message03)
 	result, err := tool.PublishMessageOnSNS(message)
 	if err != nil {
 		log.Errorf("Publish error: %v", err)
@@ -233,11 +233,10 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 
 	message03 := fmt.Sprintf("Link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answerID)
 
-	message := fmt.Sprintf("%v, %v, %v", message01, message02, message03)
+	message := fmt.Sprintf("update answer, %v, %v, %v", message01, message02, message03)
 	result, err := tool.PublishMessageOnSNS(message)
 	if err != nil {
 		log.Errorf("Publish error: %v", err)
-
 	}
 
 	log.Info("Publish message result: %v", result)
@@ -341,7 +340,7 @@ func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 		questionID, questionText, user.FirstName, user.LastName, user.Username)
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answerID, answerText)
 
-	message := fmt.Sprintf("%v, %v", message01, message02)
+	message := fmt.Sprintf("delete answer, %v, %v", message01, message02)
 	result, err := tool.PublishMessageOnSNS(message)
 	if err != nil {
 		log.Errorf("Publish error: %v", err)
