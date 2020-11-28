@@ -85,10 +85,31 @@ func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
-	} else {
-		log.Info("answer created")
-		c.JSON(http.StatusCreated, answer)
 	}
+
+	log.Info("answer created")
+	c.JSON(http.StatusCreated, answer)
+
+	/*post a message on SNS topic, including:
+	1.Question details such as ID, user's email address
+	2.Answer details such as ID, answer text, etc
+	3.HTTP link to the question & answer (created or updated):
+	http://prod.bh7cw.me:80/v1/question/{questionId}/answer/{answerId}*/
+	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
+		questionID, answer.Question.QuestionText, answer.User.FirstName, answer.User.LastName, answer.User.Username)
+
+	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answer.ID, answer.AnswerText)
+
+	message03 := fmt.Sprintf("link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answer.ID)
+
+	message := fmt.Sprintf("%v, %v, %v", message01, message02, message03)
+	result, err := tool.PublishMessageOnSNS(message)
+	if err != nil {
+		log.Errorf("Publish error: %v", err)
+
+	}
+
+	log.Info("Publish message result: %v", result)
 }
 
 //GetAnswerByID ... Get the answer by id
@@ -196,6 +217,27 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 		c.JSON(http.StatusOK, currAnswer)
 	}
 	log.Info("answer updated")
+
+	/*post a message on SNS topic, including:
+	1.Question details such as ID, user's email address
+	2.Answer details such as ID, answer text, etc
+	3.HTTP link to the question & answer (created or updated):
+	http://prod.bh7cw.me:80/v1/question/{questionId}/answer/{answerId}*/
+	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
+		questionID, currAnswer.Question.QuestionText, currAnswer.User.FirstName, currAnswer.User.LastName, currAnswer.User.Username)
+
+	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answerID, currAnswer.AnswerText)
+
+	message03 := fmt.Sprintf("link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answerID)
+
+	message := fmt.Sprintf("%v, %v, %v", message01, message02, message03)
+	result, err := tool.PublishMessageOnSNS(message)
+	if err != nil {
+		log.Errorf("Publish error: %v", err)
+
+	}
+
+	log.Info("Publish message result: %v", result)
 }
 
 //DeleteAnswer ... Delete the Answer
@@ -236,6 +278,11 @@ func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 		})
 		return
 	}
+
+	//store the user/questions/answer information before delete the answer, so we can use them in the sns publish message
+	answerText := answer.AnswerText
+	questionText := question.QuestionText
+	user := answer.User
 
 	answer = getAllFilesByAnswer(answer, client)
 	if len(answer.Attachments) != 0 {
@@ -283,4 +330,20 @@ func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	}
 
 	log.Info("answer deleted")
+
+	/*post a message on SNS topic, including:
+	1.Question details such as ID, user's email address
+	2.Answer details such as ID, answer text, etc*/
+	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
+		questionID, questionText, user.FirstName, user.LastName, user.Username)
+	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answerID, answerText)
+
+	message := fmt.Sprintf("%v, %v", message01, message02)
+	result, err := tool.PublishMessageOnSNS(message)
+	if err != nil {
+		log.Errorf("Publish error: %v", err)
+
+	}
+
+	log.Info("Publish message result: %v", result)
 }
