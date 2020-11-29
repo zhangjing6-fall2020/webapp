@@ -190,9 +190,9 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 
 	currAnswer.UserID = userID
 	if err := model.GetUserByID(&currAnswer.User, userID, client); err != nil {
-		log.Error("can't get the question id")
+		log.Error("can't get the user by id")
 		c.JSON(http.StatusNotFound, gin.H{
-			"err": "can't get the question id",
+			"err": "can't get the user by id",
 		})
 		return
 	}
@@ -226,7 +226,7 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v, AnswerID: %v, AnswerText: %v, link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v
 	*/
 	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
-		questionID, currAnswer.Question.QuestionText, currAnswer.User.FirstName, currAnswer.User.LastName, *currAnswer.User.Username)
+		questionID, question.QuestionText, currAnswer.User.FirstName, currAnswer.User.LastName, *currAnswer.User.Username)
 
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answerID, currAnswer.AnswerText)
 
@@ -283,7 +283,6 @@ func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	//store the user/questions/answer information before delete the answer, so we can use them in the sns publish message
 	answerText := answer.AnswerText
 	questionText := question.QuestionText
-	user := answer.User
 
 	answer = getAllFilesByAnswer(answer, client)
 	if len(answer.Attachments) != 0 {
@@ -331,6 +330,15 @@ func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	}
 
 	log.Info("answer deleted")
+
+	var user entity.User
+	if err := model.GetUserByID(&user, userID, client); err != nil {
+		log.Error("can't get the user by id")
+		c.JSON(http.StatusNotFound, gin.H{
+			"err": "can't get the user by id",
+		})
+		return
+	}
 
 	/*post a message on SNS topic, including:
 	1.Question details such as ID, user's email address
