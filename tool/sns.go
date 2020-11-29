@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
@@ -51,6 +52,7 @@ func initSNSClient() *sns.SNS {
 
 func PublishMessageOnSNS(message string) (*sns.PublishOutput, error) {
 	log.Info("start to publish message in sns")
+	fmt.Println("start to publish message in sns")
 	input := &sns.PublishInput{
 		Message:  aws.String(message),
 		TopicArn: aws.String("arn:aws:sns:us-east-1:907204364947:topic"),
@@ -58,8 +60,11 @@ func PublishMessageOnSNS(message string) (*sns.PublishOutput, error) {
 
 	result, err := initSNSClient().Publish(input)
 	if err != nil {
+		log.Errorf("Failed to publish message: %v\n", err)
+		fmt.Printf("Failed to publish message: %v\n", err)
 		return nil, err
 	}
 	log.Info("completed to publish message in sns")
+	fmt.Println("completed to publish message in sns")
 	return result, nil
 }

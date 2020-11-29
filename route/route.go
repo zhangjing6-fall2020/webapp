@@ -3,6 +3,7 @@ package route
 import (
 	"cloudcomputing/webapp/auth"
 	"cloudcomputing/webapp/controller"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
@@ -147,6 +148,7 @@ func SetupRouter(client *statsd.Client) *gin.Engine {
 	authorized.POST("question/:question_id/answer", func(c *gin.Context) {
 		a5++
 		log.Info("creating an answer for a question with auth")
+		fmt.Println("creating an answer for a question")
 		t := client.NewTiming()
 		controller.CreateAnswer(c, auth.GetCurrentUserID(client), client)
 		t.Send("post_answer.response_time")
