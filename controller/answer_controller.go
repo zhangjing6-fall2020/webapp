@@ -109,7 +109,7 @@ func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 
 	}
 
-	log.Info("Publish message result: %v", result)
+	log.Infof("Publish message result: %v", result)
 }
 
 //GetAnswerByID ... Get the answer by id
@@ -239,7 +239,7 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 		log.Errorf("Publish error: %v", err)
 	}
 
-	log.Info("Publish message result: %v", result)
+	log.Infof("Publish message result: %v", result)
 }
 
 //DeleteAnswer ... Delete the Answer
@@ -347,5 +347,5 @@ func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 
 	}
 
-	log.Info("Publish message result: %v", result)
+	log.Infof("Publish message result: %v", result)
 }
