@@ -35,6 +35,7 @@ func initSNSSession() *session.Session {
 		}
 	}
 
+	log.Info("initialized SNS session")
 	return sns_session
 }
 
@@ -44,11 +45,12 @@ func initSNSClient() *sns.SNS {
 		// Create SNS client
 		sns_client = sns.New(sns_session)
 	}
-
+	log.Info("initialized SNS client")
 	return sns_client
 }
 
 func PublishMessageOnSNS(message string) (*sns.PublishOutput, error) {
+	log.Info("start to publish message in sns")
 	input := &sns.PublishInput{
 		Message:  aws.String(message),
 		TopicArn: aws.String("arn:aws:sns:us-east-1:907204364947:topic"),
@@ -58,6 +60,6 @@ func PublishMessageOnSNS(message string) (*sns.PublishOutput, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	log.Info("completed to publish message in sns")
 	return result, nil
 }
