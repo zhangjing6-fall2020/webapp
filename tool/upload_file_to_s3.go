@@ -30,7 +30,7 @@ var svc *s3.S3
 //https://docs.aws.amazon.com/sdk-for-go/api/aws/session/
 func initSession() *session.Session {
 	if sess == nil {
-		log.Trace("initialize s3 session")
+		log.Info("initialize s3 session")
 		newSess, err := session.NewSessionWithOptions(session.Options{
 			// Specify profile to load for the session's config
 			Profile: "dev",
@@ -47,7 +47,7 @@ func initSession() *session.Session {
 		if err != nil {
 			log.Error("can't load the aws session")
 		} else {
-			log.Trace("loaded s3 session")
+			log.Info("loaded s3 session")
 			sess = newSess
 		}
 	}
