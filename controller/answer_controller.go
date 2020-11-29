@@ -50,7 +50,6 @@ func GetAnswers(c *gin.Context, client *statsd.Client) {
 //CreateAnswer ... Create Answer
 func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("creating answer")
-	fmt.Println("creating answer")
 	var answer entity.Answer
 	c.BindJSON(&answer)
 
@@ -89,10 +88,7 @@ func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	}
 
 	log.Info("answer created")
-	fmt.Println("answer created")
 	c.JSON(http.StatusCreated, answer)
-
-	fmt.Println("start to publish message")
 
 	/*post a message on SNS topic, including:
 	1.Question details such as ID, user's email address
@@ -100,22 +96,19 @@ func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	3.HTTP link to the question & answer (created or updated):
 	http://prod.bh7cw.me:80/v1/question/{questionId}/answer/{answerId}*/
 	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
-		questionID, answer.Question.QuestionText, answer.User.FirstName, answer.User.LastName, answer.User.Username)
+		questionID, answer.Question.QuestionText, answer.User.FirstName, answer.User.LastName, *answer.User.Username)
 
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answer.ID, answer.AnswerText)
 
 	message03 := fmt.Sprintf("Link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v", questionID, answer.ID)
 
 	message := fmt.Sprintf("create answer, %v, %v, %v", message01, message02, message03)
-	fmt.Sprintf("message: %v\n", message)
 	result, err := tool.PublishMessageOnSNS(message)
 	if err != nil {
 		log.Errorf("Publish error: %v", err)
-		fmt.Errorf("Publish error: %v", err)
 	}
 
 	log.Infof("Publish message result: %v", result)
-	fmt.Printf("Publish message result: %v\n", result)
 }
 
 //GetAnswerByID ... Get the answer by id
@@ -233,7 +226,7 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v, AnswerID: %v, AnswerText: %v, link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v
 	*/
 	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
-		questionID, currAnswer.Question.QuestionText, currAnswer.User.FirstName, currAnswer.User.LastName, currAnswer.User.Username)
+		questionID, currAnswer.Question.QuestionText, currAnswer.User.FirstName, currAnswer.User.LastName, *currAnswer.User.Username)
 
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answerID, currAnswer.AnswerText)
 
@@ -343,7 +336,7 @@ func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	1.Question details such as ID, user's email address
 	2.Answer details such as ID, answer text, etc*/
 	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
-		questionID, questionText, user.FirstName, user.LastName, user.Username)
+		questionID, questionText, user.FirstName, user.LastName, *user.Username)
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answerID, answerText)
 
 	message := fmt.Sprintf("delete answer, %v, %v", message01, message02)
