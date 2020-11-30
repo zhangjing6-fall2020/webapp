@@ -2,7 +2,7 @@
 webapp running at port: 8080
 
 secrets setting:
-- prod or dev
+- `cicd` user in prod or dev
 
 webapp design logic:
 - question with any answers cannot be deleted
@@ -95,3 +95,6 @@ Changes from a7 to a8:
 - add auto scaling instead of ec2
 - add load-balancer
 - add jmeter to do load test
+
+Changes from a8 to a9:
+- add create/update/delete answer will publish message in sns on aws
