@@ -90,13 +90,23 @@ func CreateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	log.Info("answer created")
 	c.JSON(http.StatusCreated, answer)
 
+	//get the user who submitted the question, and will receive the answers' updates email
+	var user entity.User
+	if err := model.GetUserByID(&user, answer.Question.UserID, client); err != nil {
+		log.Error("can't get the user by id")
+		c.JSON(http.StatusNotFound, gin.H{
+			"err": "can't get the user by id",
+		})
+		return
+	}
+
 	/*post a message on SNS topic, including:
 	1.Question details such as ID, user's email address
 	2.Answer details such as ID, answer text, etc
 	3.HTTP link to the question & answer (created or updated):
 	http://prod.bh7cw.me:80/v1/question/{questionId}/answer/{answerId}*/
 	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
-		questionID, answer.Question.QuestionText, answer.User.FirstName, answer.User.LastName, *answer.User.Username)
+		questionID, answer.Question.QuestionText, user.FirstName, user.LastName, *user.Username)
 
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answer.ID, answer.AnswerText)
 
@@ -217,6 +227,16 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	}
 	log.Info("answer updated")
 
+	//get the user who submitted the question, and will receive the answers' updates email
+	var user entity.User
+	if err := model.GetUserByID(&user, question.UserID, client); err != nil {
+		log.Error("can't get the user by id")
+		c.JSON(http.StatusNotFound, gin.H{
+			"err": "can't get the user by id",
+		})
+		return
+	}
+
 	/*post a message on SNS topic, including:
 	1.Question details such as ID, user's email address
 	2.Answer details such as ID, answer text, etc
@@ -226,7 +246,7 @@ func UpdateAnswer(c *gin.Context, userID string, client *statsd.Client) {
 	QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v, AnswerID: %v, AnswerText: %v, link: http://prod.bh7cw.me:80/v1/question/%v/answer/%v
 	*/
 	message01 := fmt.Sprintf("QuestionID: %v, QuestionText: %v, UserName: %v %v, UserEmail: %v",
-		questionID, question.QuestionText, currAnswer.User.FirstName, currAnswer.User.LastName, *currAnswer.User.Username)
+		questionID, question.QuestionText, user.FirstName, user.LastName, *user.Username)
 
 	message02 := fmt.Sprintf("AnswerID: %v, AnswerText: %v", answerID, currAnswer.AnswerText)
 
@@ -331,8 +351,9 @@ func DeleteAnswer(c *gin.Context, userID string, client *statsd.Client) {
 
 	log.Info("answer deleted")
 
+	//get the user who submitted the question, and will receive the answers' updates email
 	var user entity.User
-	if err := model.GetUserByID(&user, userID, client); err != nil {
+	if err := model.GetUserByID(&user, question.UserID, client); err != nil {
 		log.Error("can't get the user by id")
 		c.JSON(http.StatusNotFound, gin.H{
 			"err": "can't get the user by id",
