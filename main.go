@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
 	"os"
+	"time"
 )
 
 var err error
@@ -96,6 +97,8 @@ zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
 		Net:                  "tcp",
 		AllowNativePasswords: true,
 		TLSConfig:            "custom",
+		Loc:                  time.Local,
+		ParseTime:            true,
 	}
 	config.DB, err = gorm.Open("mysql", cfg.FormatDSN())
 	//config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
