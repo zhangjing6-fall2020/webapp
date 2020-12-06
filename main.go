@@ -46,10 +46,10 @@ func main() {
 
 	//set up db
 	cfg := mysql.Config{
-		Addr:   tool.GetHostname(),            //"localhost",
-		User:   tool.GetEnvVar("DB_USERNAME"), //"csye6225fall2020","root",
-		Passwd: tool.GetEnvVar("DB_PASSWORD"), //"MysqlPwd123",
-		DBName: tool.GetEnvVar("DB_NAME"),     //"csye6225",//"user_story",
+		Addr:   fmt.Sprintf("%s:%d", tool.GetHostname(), 3306), //"localhost",
+		User:   tool.GetEnvVar("DB_USERNAME"),                  //"csye6225fall2020","root",
+		Passwd: tool.GetEnvVar("DB_PASSWORD"),                  //"MysqlPwd123",
+		DBName: tool.GetEnvVar("DB_NAME"),                      //"csye6225",//"user_story",
 		//TLSConfig: "custom",
 	}
 	config.DB, err = gorm.Open("mysql", cfg.FormatDSN())
