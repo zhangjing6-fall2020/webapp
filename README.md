@@ -98,3 +98,6 @@ Changes from a7 to a8:
 
 Changes from a8 to a9:
 - add create/update/delete answer will publish message in sns on aws
+
+Changes from a9 to a10:
+- add ssl secure database connection 
