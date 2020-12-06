@@ -16,6 +16,8 @@ vendor/
 mysql/
 mysql
 
+images/
+
 *.idea
 webapp
 
