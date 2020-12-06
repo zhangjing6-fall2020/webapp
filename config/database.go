@@ -40,6 +40,7 @@ func BuildDBConfig() *DBConfig {
 		Password: tool.GetEnvVar("DB_PASSWORD"), //"MysqlPwd123",
 		DBName:   tool.GetEnvVar("DB_NAME"),     //"csye6225",//"user_story",
 	}
+
 	return &dbConfig
 }
 

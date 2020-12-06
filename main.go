@@ -4,7 +4,9 @@ import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/route"
+	"cloudcomputing/webapp/tool"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
@@ -43,7 +45,15 @@ func main() {
 	defer client.Close()
 
 	//set up db
-	config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
+	cfg := mysql.Config{
+		Addr:   tool.GetHostname(),            //"localhost",
+		User:   tool.GetEnvVar("DB_USERNAME"), //"csye6225fall2020","root",
+		Passwd: tool.GetEnvVar("DB_PASSWORD"), //"MysqlPwd123",
+		DBName: tool.GetEnvVar("DB_NAME"),     //"csye6225",//"user_story",
+		//TLSConfig: "custom",
+	}
+	config.DB, err = gorm.Open("mysql", cfg.FormatDSN())
+	//config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
 	if err != nil {
 		fmt.Println("Status:", err)
 		log.Errorf("failed to connect to database: %v", err)
