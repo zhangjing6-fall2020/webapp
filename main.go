@@ -4,16 +4,10 @@ import (
 	"cloudcomputing/webapp/config"
 	"cloudcomputing/webapp/entity"
 	"cloudcomputing/webapp/route"
-	"cloudcomputing/webapp/tool"
-	"crypto/tls"
-	"crypto/x509"
-	"fmt"
-	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
 	"os"
-	"time"
 )
 
 var err error
@@ -55,7 +49,7 @@ func main() {
 	defer client.Close()
 
 	//set up db
-	rootCertPool := x509.NewCertPool()
+	/*rootCertPool := x509.NewCertPool()
 	//download from https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html
 	pem := `-----BEGIN CERTIFICATE-----
 MIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
@@ -100,8 +94,8 @@ zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
 		Loc:                  time.Local,
 		ParseTime:            true,
 	}
-	config.DB, err = gorm.Open("mysql", cfg.FormatDSN())
-	//config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
+	config.DB, err = gorm.Open("mysql", cfg.FormatDSN())*/
+	config.DB, err = gorm.Open("mysql", config.DbURL(config.BuildDBConfig()))
 	if err != nil {
 		log.Errorf("failed to connect to database: %v", err)
 	}
