@@ -18,12 +18,12 @@ import (
 
 var err error
 
-type Result struct {
+/*type Result struct {
 	id              int
 	user            string
 	host            string
 	connection_type string
-}
+}*/
 
 func main() {
 	log.Info("webapp starts...")
@@ -92,7 +92,7 @@ zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
 	cfg := mysql.Config{
 		Addr:                 fmt.Sprintf("%s:%d", tool.GetHostname(), 3306), //"localhost",
 		User:                 tool.GetEnvVar("DB_USERNAME"),                  //"csye6225fall2020","root",
-		Passwd:               tool.GetEnvVar("DB_PASSWORD"),                  //"MysqlPwd123",
+		Passwd:               tool.GetEnvVar("DB_PASSWORD"),                  //"MysqlPwd123","Znt9yjNTp5NR"
 		DBName:               tool.GetEnvVar("DB_NAME"),                      //"csye6225",//"user_story",
 		Net:                  "tcp",
 		AllowNativePasswords: true,
@@ -117,15 +117,16 @@ zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
 	config.DB.AutoMigrate(&entity.QuestionFile{}).AddForeignKey("id", "files(id)", "RESTRICT", "RESTRICT").AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT")
 	log.Info("created tables in database")
 
-	sql := `SELECT id, user, host, connection_type 
-       FROM performance_schema.threads pst 
-       INNER JOIN information_schema.processlist isp 
+	/*not working
+	sql := `SELECT id, user, host, connection_type
+       FROM performance_schema.threads pst
+       INNER JOIN information_schema.processlist isp
        ON pst.processlist_id = isp.id;`
 	var result Result
 	config.DB.Raw(sql).Scan(&result)
 
 	log.Infof("ssl connection:\n%v", result)
-	fmt.Printf("ssl connection:\n%v", result)
+	fmt.Printf("ssl connection:\n%v", result)*/
 
 	log.Info("waiting for request...")
 	r := route.SetupRouter(client)
