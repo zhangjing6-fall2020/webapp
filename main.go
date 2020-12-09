@@ -117,6 +117,16 @@ zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
 	config.DB.AutoMigrate(&entity.QuestionFile{}).AddForeignKey("id", "files(id)", "RESTRICT", "RESTRICT").AddForeignKey("question_id", "questions(id)", "RESTRICT", "RESTRICT")
 	log.Info("created tables in database")
 
+	sql := `SELECT id, user, host, connection_type 
+       FROM performance_schema.threads pst 
+       INNER JOIN information_schema.processlist isp 
+       ON pst.processlist_id = isp.id;`
+	var result Result
+	config.DB.Raw(sql).Scan(&result)
+
+	log.Infof("ssl connection:\n%v", result)
+	fmt.Printf("ssl connection:\n%v", result)
+
 	log.Info("waiting for request...")
 	r := route.SetupRouter(client)
 
