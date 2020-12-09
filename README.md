@@ -60,6 +60,12 @@ Debug code deploy:
 //https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-view-logs.html
 - `less /var/log/aws/codedeploy-agent/codedeploy-agent.log`
 
+Related ssl links:
+- [connect to rds commands](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ConnectToInstance.html)
+- [check ssl connection](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/ssl-certificate-rotation-mysql.html#ssl-certificate-rotation-mysql.determining-server)
+- [check ssl param in mysql](https://dev.mysql.com/doc/refman/8.0/en/performance-schema-quick-start.html)
+- [gorm](https://gorm.io/docs/sql_builder.html)
+
 About demo ssl:
 - open ssh 22 port
 - ssh ec2
