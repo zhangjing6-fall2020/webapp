@@ -19,8 +19,8 @@ Endpoints:
 - https://app.swaggerhub.com/apis-docs/csye6225/fall2020-csye6225/assignment-03
 - https://app.swaggerhub.com/apis-docs/csye6225/fall2020-csye6225/assignment-05
 
-Details about each assignment:
-- https://github.com/bh7cw/demo?organization=bh7cw&organization=bh7cw
+Related repo:
+- each assignment](https://github.com/bh7cw/demo?organization=bh7cw&organization=bh7cw)
 
 secrets setting:
 - `cicd` user in prod or dev account
