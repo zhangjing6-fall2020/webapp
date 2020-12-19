@@ -17,6 +17,29 @@ Instructions:
    - open the jmx file
    - run the load test
 
+Stack used:
+- golang
+- Gorm
+- Gin
+
+Components on AWS used:
+- EC2 Instances, Security Groups, AMI, Auto Scaling, Load balaner
+- Rds
+- DynamoDB
+- S3
+- CloudWatch
+- VPC
+- CodeDeploy
+- Route53
+- Lambda
+- SNS
+- SES
+- Certificate Manager
+
+Tools:
+- Github actions
+- JMeter
+
 See more details:
 - Design:  doc/design.md
 - Version: doc/version.md

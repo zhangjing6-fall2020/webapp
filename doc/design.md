@@ -2,6 +2,7 @@ Webapp is a blog web application, which includes:
 - create/update/delete users with user information(name, email, password, etc)
 - authorized users are able to create/update/delete questions with images, and answers with images
 - users will receive emails if the questions they asked are answered, updated or deleted
+- use DynamoDB to store the message published on SNS and sent to users by SES to avoid sending duplicate emails
 - auto scaling groups to scale out/in according to CPU utilization
 - connect to rds using ssl
 - load balancer uses ssl to confirm security
