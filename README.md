@@ -41,6 +41,6 @@ Tools:
 - JMeter
 
 See more details:
-- Design:  [doc/design.md](https://github.com/zhangjing6-fall2020/webapp/blob/master/doc/design.md)
-- Version: [doc/version.md](https://github.com/zhangjing6-fall2020/webapp/blob/master/doc/version.md)
-- Command: [doc/command.md](https://github.com/zhangjing6-fall2020/webapp/blob/master/doc/command.md)
+- Design:  [doc/design.md](https://github.com/bh7cw/webapp/blob/master/doc/design.md)
+- Version: [doc/version.md](https://github.com/bh7cw/webapp/blob/master/doc/version.md)
+- Command: [doc/command.md](https://github.com/bh7cw/webapp/blob/master/doc/command.md)

@@ -20,7 +20,10 @@ Endpoints:
 - https://app.swaggerhub.com/apis-docs/csye6225/fall2020-csye6225/assignment-05
 
 Related repo:
-- each assignment](https://github.com/bh7cw/demo?organization=bh7cw&organization=bh7cw)
+- [infrastructure](https://github.com/bh7cw/infrastructure.git)
+- [serverless](https://github.com/bh7cw/serverless.git)
+- [ami](https://github.com/zhangjing6-fall2020/ami.git)
+- [each assignment](https://github.com/bh7cw/demo.git)
 
 secrets setting:
 - `cicd` user in prod or dev account
