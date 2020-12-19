@@ -61,9 +61,9 @@ func ConfigDB() error {
 
 	cfg := mysql.Config{
 		Addr:                 fmt.Sprintf("%s:%d", tool.GetHostname(), 3306), //"localhost",
-		User:                 tool.GetEnvVar("DB_USERNAME"),                    //"csye6225fall2020","root",
-		Passwd:               tool.GetEnvVar("DB_PASSWORD"),                    //"Znt9yjNTp5NR"
-		DBName:               tool.GetEnvVar("DB_NAME"),                        //"csye6225", "user_story",
+		User:                 tool.GetEnvVar("DB_USERNAME"),                  //"csye6225fall2020","root",
+		Passwd:               tool.GetEnvVar("DB_PASSWORD"),                  //"Znt9yjNTp5NR"
+		DBName:               tool.GetEnvVar("DB_NAME"),                      //"csye6225", "user_story",
 		Net:                  "tcp",
 		AllowNativePasswords: true,
 		TLSConfig:            "custom",
